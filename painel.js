@@ -25,6 +25,8 @@ const tituloPasta = document.getElementById("tituloPasta");
 const btnVoltar = document.getElementById("btnVoltar");
 const btnCopiarCodigo = document.getElementById("btnCopiarCodigo");
 const btnEditarInfo = document.getElementById("btnEditarInfo");
+const btnUpgrade = document.getElementById("btnUpgrade");
+const inputUpgrade = document.getElementById("inputUpgrade");
 
 const modalEditar = document.getElementById("modalEditar");
 const editNome = document.getElementById("editNome");
@@ -155,25 +157,6 @@ function obterTextoEventoConexao(evento) {
   return evento || "Sem evento";
 }
 
-async function uploadImagemPonto(file, codigo) {
-  const extensao = (file.name.split(".").pop() || "jpg").toLowerCase();
-  const nomeArquivo = `${codigo}/${Date.now()}.${extensao}`;
-
-  const { error: uploadError } = await supabaseClient.storage
-    .from(BUCKET)
-    .upload(nomeArquivo, file, {
-      cacheControl: "3600",
-      upsert: true
-    });
-
-  if (uploadError) {
-    throw uploadError;
-  }
-
-  const { data } = supabaseClient.storage.from(BUCKET).getPublicUrl(nomeArquivo);
-  return data.publicUrl;
-}
-
 function obterChavePosicaoImagem(codigo) {
   return `ponto_imagem_posicao_${codigo}`;
 }
@@ -206,6 +189,87 @@ function lerPosicaoImagem(codigo) {
 function aplicarPosicaoImagem(el, posicao) {
   if (!el || !posicao) return;
   el.style.objectPosition = `${posicao.x}% ${posicao.y}%`;
+}
+
+function normalizarNomeArquivo(nome) {
+  return String(nome || "arquivo")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w.\-]+/g, "_");
+}
+
+function detectarTipoArquivo(file) {
+  const nome = String(file?.name || "").toLowerCase();
+  const mime = String(file?.type || "").toLowerCase();
+
+  if (mime.startsWith("video/") || nome.endsWith(".mp4")) return "video";
+  if (mime === "image/jpeg" || nome.endsWith(".jpg") || nome.endsWith(".jpeg")) return "imagem";
+  if (mime.startsWith("text/") || nome.endsWith(".txt")) return "texto";
+  return null;
+}
+
+function arquivoPermitido(file) {
+  return Boolean(detectarTipoArquivo(file));
+}
+
+async function uploadImagemPonto(file, codigo) {
+  const extensao = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const nomeArquivo = `${codigo}/${Date.now()}.${extensao}`;
+
+  const { error: uploadError } = await supabaseClient.storage
+    .from(BUCKET)
+    .upload(nomeArquivo, file, {
+      cacheControl: "3600",
+      upsert: true
+    });
+
+  if (uploadError) {
+    throw uploadError;
+  }
+
+  const { data } = supabaseClient.storage.from(BUCKET).getPublicUrl(nomeArquivo);
+  return data.publicUrl;
+}
+
+async function uploadArquivoPlaylist(file, codigo) {
+  const nomeSeguro = normalizarNomeArquivo(file.name);
+  const caminho = `${codigo}/${Date.now()}_${nomeSeguro}`;
+
+  const { error: uploadError } = await supabaseClient.storage
+    .from(BUCKET)
+    .upload(caminho, file, {
+      cacheControl: "3600",
+      upsert: false
+    });
+
+  if (uploadError) {
+    throw uploadError;
+  }
+
+  const { data } = supabaseClient.storage.from(BUCKET).getPublicUrl(caminho);
+
+  return {
+    caminho,
+    url: data.publicUrl
+  };
+}
+
+async function obterProximaOrdemPlaylist(codigo) {
+  const { data, error } = await supabaseClient
+    .from(TABELA)
+    .select("ordem")
+    .eq("codigo", codigo)
+    .order("ordem", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data || !data.length) return 0;
+
+  const ultima = Number(data[0].ordem);
+  return Number.isFinite(ultima) ? ultima + 1 : 0;
 }
 
 function validarLogin() {
@@ -382,7 +446,7 @@ function fecharModalEdicao() {
 
 if (btnVoltar) {
   btnVoltar.onclick = () => {
-    if (listaPontos) listaPontos.style.display = "block";
+    if (listaPontos) listaPontos.style.display = "grid";
     if (pontoDetalhe) pontoDetalhe.style.display = "none";
   };
 }
@@ -542,22 +606,116 @@ if (btnSalvarEdicao) {
   };
 }
 
+if (btnUpgrade && inputUpgrade) {
+  btnUpgrade.onclick = () => {
+    if (!codigoSelecionado) {
+      setStatus("Abra um ponto primeiro", "erro");
+      return;
+    }
+    inputUpgrade.value = "";
+    inputUpgrade.click();
+  };
+
+  inputUpgrade.addEventListener("change", async e => {
+    const arquivo = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+    if (!arquivo || !codigoSelecionado) return;
+
+    if (!arquivoPermitido(arquivo)) {
+      setStatus("Use mp4, jpg, jpeg ou txt", "erro");
+      inputUpgrade.value = "";
+      return;
+    }
+
+    const tipo = detectarTipoArquivo(arquivo);
+    const respostaDataFim = window.prompt("Data de encerramento opcional no formato AAAA-MM-DD", "");
+    let dataFim = null;
+
+    if (respostaDataFim && respostaDataFim.trim()) {
+      const valor = respostaDataFim.trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
+        dataFim = `${valor}T23:59:59`;
+      } else {
+        setStatus("Data inválida. Use AAAA-MM-DD", "erro");
+        inputUpgrade.value = "";
+        return;
+      }
+    }
+
+    try {
+      setStatus("Enviando material...", "normal");
+
+      const ordem = await obterProximaOrdemPlaylist(codigoSelecionado);
+      const upload = await uploadArquivoPlaylist(arquivo, codigoSelecionado);
+
+      const payload = {
+        codigo: codigoSelecionado,
+        nome: arquivo.name,
+        tipo,
+        arquivo_url: upload.url,
+        caminho_storage: upload.caminho,
+        mime_type: arquivo.type || null,
+        tamanho_bytes: Number.isFinite(arquivo.size) ? arquivo.size : null,
+        ordem,
+        data_fim: dataFim
+      };
+
+      const { error } = await supabaseClient
+        .from(TABELA)
+        .insert(payload);
+
+      if (error) {
+        console.error(error);
+        setStatus("Erro ao salvar material", "erro");
+        inputUpgrade.value = "";
+        return;
+      }
+
+      setStatus("Material enviado com sucesso", "ok");
+      inputUpgrade.value = "";
+      await carregarPlaylist();
+    } catch (error) {
+      console.error(error);
+      setStatus("Erro no upload", "erro");
+      inputUpgrade.value = "";
+    }
+  });
+}
+
+function montarAcoesPlaylist(item) {
+  const url = item.arquivo_url ? String(item.arquivo_url) : "";
+  const abrir = url
+    ? `<a class="playlist-acao" href="${url}" target="_blank" rel="noopener noreferrer" title="Abrir">↗</a>`
+    : "";
+
+  return `
+    <div class="playlist-item-acoes-laterais">
+      ${abrir}
+      <button class="playlist-acao btn-excluir-item" type="button" data-id="${item.id}" title="Excluir">🗑</button>
+    </div>
+  `;
+}
+
+function montarNomePlaylist(item) {
+  const nome = escapeHtml(item.nome || "Arquivo");
+  const tipo = escapeHtml(item.tipo || "");
+  const sufixo = tipo ? ` <small>[${tipo}]</small>` : "";
+  return `${nome}${sufixo}`;
+}
+
 function montarItemPlaylist(item, index) {
   return `
     <div class="playlist-item" draggable="true" data-index="${index}" data-id="${item.id}">
       <div class="playlist-item-linha">
         <div class="playlist-item-handle" title="Arrastar">⋮⋮</div>
         <div class="playlist-item-ordem">${index + 1}.</div>
-        <div class="playlist-item-nome" title="${escapeHtml(item.nome)}">${escapeHtml(item.nome)}</div>
+        <div class="playlist-item-nome" title="${escapeHtml(item.nome)}">${montarNomePlaylist(item)}</div>
         <div class="playlist-item-data playlist-item-postado">
           ${formatarDataHora(item.created_at)}
         </div>
         <div class="playlist-item-data playlist-item-encerramento">
           ${formatarData(item.data_fim)}
         </div>
-        <div class="playlist-item-acoes-laterais">
-          <button class="playlist-acao btn-excluir-item" type="button" data-id="${item.id}" title="Excluir">🗑</button>
-        </div>
+        ${montarAcoesPlaylist(item)}
       </div>
     </div>
   `;
@@ -671,6 +829,16 @@ function ativarExclusaoItens() {
 
       const confirmar = window.confirm("Deseja excluir este item da playlist?");
       if (!confirmar) return;
+
+      const { data: itemData } = await supabaseClient
+        .from(TABELA)
+        .select("caminho_storage")
+        .eq("id", id)
+        .single();
+
+      if (itemData?.caminho_storage) {
+        await supabaseClient.storage.from(BUCKET).remove([itemData.caminho_storage]);
+      }
 
       const { error } = await supabaseClient
         .from(TABELA)

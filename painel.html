@@ -5,353 +5,297 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Duna Branding | Painel</title>
   <link rel="stylesheet" href="painel.css?v=101">
-
   <style>
-    body {
-      margin: 0;
-      background:
-        radial-gradient(circle at top, rgba(91, 129, 255, 0.18) 0%, rgba(255,255,255,0) 28%),
-        linear-gradient(180deg, #f7f9ff 0%, #eef3ff 100%) !important;
-      color: #0f172a;
+    :root {
+      --claro-bg: #f4f7fb;
+      --claro-bg-sec: #ffffff;
+      --claro-borda: #dbe4f0;
+      --claro-texto: #1f2a37;
+      --claro-texto-suave: #5f6f82;
+      --claro-azul: #2f6fed;
+      --claro-azul-hover: #245bd0;
+      --claro-verde: #1fa971;
+      --claro-sombra: 0 10px 30px rgba(31, 42, 55, 0.08);
     }
 
-    .novo-topo {
-      width: calc(100% - 64px);
-      margin: 28px auto 22px;
-      padding: 26px 28px;
-      border-radius: 28px;
-      background: linear-gradient(135deg, #0f1f4d 0%, #1a2f6b 48%, #2948a3 100%);
-      box-shadow:
-        0 18px 45px rgba(15, 31, 77, 0.18),
-        inset 0 1px 0 rgba(255,255,255,0.10);
+    body {
+      background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%) !important;
+      color: var(--claro-texto) !important;
+    }
+
+    .login-screen {
+      background: linear-gradient(180deg, #f8fbff 0%, #edf4fb 100%) !important;
+    }
+
+    .login-card,
+    .modal-conteudo,
+    .playlist-box,
+    .pontos-box,
+    .playlist-secao,
+    .card-ponto,
+    .topo-fixo.novo-topo {
+      background: var(--claro-bg-sec) !important;
+      color: var(--claro-texto) !important;
+      border: 1px solid var(--claro-borda) !important;
+      box-shadow: var(--claro-sombra) !important;
+    }
+
+    .painel-shell {
+      background: transparent !important;
+    }
+
+    .topo-fixo.novo-topo {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 18px;
-      box-sizing: border-box;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .novo-topo::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.16), transparent 22%),
-        radial-gradient(circle at 80% 10%, rgba(122,162,255,0.20), transparent 20%);
-      pointer-events: none;
+      padding: 18px 22px;
+      border-radius: 20px;
+      margin-bottom: 22px;
+      position: sticky;
+      top: 12px;
+      z-index: 20;
     }
 
     .topo-esquerda,
     .topo-centro,
     .topo-direita {
-      position: relative;
-      z-index: 1;
+      display: flex;
+      align-items: center;
     }
 
     .topo-centro {
       flex: 1;
-      text-align: center;
-    }
-
-    .topo-centro h1 {
-      margin: 0 0 8px;
-      font-size: clamp(28px, 3vw, 40px);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: #ffffff;
-      text-shadow: 0 6px 18px rgba(0,0,0,0.20);
-    }
-
-    .topo-centro p {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 500;
-      color: rgba(230, 238, 255, 0.92);
+      justify-content: center;
     }
 
     .topo-direita {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 10px;
-      min-width: 120px;
-    }
-
-    .logo-topo-img {
-      max-width: 74px;
-      height: auto;
-      object-fit: contain;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.20));
-    }
-
-    .status-topo {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, #16a34a, #22c55e);
-      color: #ffffff;
-      font-weight: 700;
-      font-size: 14px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      box-shadow: 0 10px 24px rgba(34, 197, 94, 0.28);
-    }
-
-    .painel-shell {
-      width: calc(100% - 64px);
-      margin: 0 auto 30px;
-      padding: 22px;
-      border-radius: 30px;
-      background: linear-gradient(135deg, #273142 0%, #2e394d 100%);
-      box-shadow:
-        0 24px 50px rgba(15, 23, 42, 0.14),
-        inset 0 1px 0 rgba(255,255,255,0.06);
-      box-sizing: border-box;
-    }
-
-    .pontos-box {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 18px;
-      justify-content: flex-start;
-    }
-
-    .card-ponto {
-      width: 292px;
-      border-radius: 26px;
-      padding: 14px;
-      box-sizing: border-box;
-      background: linear-gradient(180deg, #132a64 0%, #102454 100%);
-      border: 1px solid rgba(255,255,255,0.06);
-      box-shadow:
-        0 18px 35px rgba(2, 6, 23, 0.22),
-        inset 0 1px 0 rgba(255,255,255,0.05);
-      transition: transform 0.22s ease, box-shadow 0.22s ease;
-    }
-
-    .card-ponto:hover {
-      transform: translateY(-4px);
-      box-shadow:
-        0 24px 42px rgba(2, 6, 23, 0.28),
-        inset 0 1px 0 rgba(255,255,255,0.07);
-    }
-
-    .card-status-topo {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      color: #ffb4b4;
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .status-bolinha {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #ff355d;
-      box-shadow: 0 0 0 4px rgba(255, 53, 93, 0.15);
-      display: inline-block;
-      flex-shrink: 0;
-    }
-
-    .card-imagem-box {
-      width: 100%;
-      height: 180px;
-      border-radius: 20px;
-      overflow: hidden;
-      background: #dfe5ef;
-      margin-bottom: 14px;
-    }
-
-    .card-imagem {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-    }
-
-    .card-conteudo {
-      color: #ffffff;
-    }
-
-    .card-nome {
-      font-size: 18px;
-      font-weight: 800;
-      margin-bottom: 12px;
-      line-height: 1.2;
-    }
-
-    .card-info-linha {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
       gap: 12px;
-      margin-bottom: 14px;
     }
 
-    .card-cidade {
+    .menu-topo-wrap {
+      position: relative;
+    }
+
+    .menu-topo-btn {
+      background: #ffffff !important;
+      color: var(--claro-texto) !important;
+      border: 1px solid var(--claro-borda) !important;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(31, 42, 55, 0.06);
+    }
+
+    .menu-topo-dropdown {
+      background: #ffffff !important;
+      border: 1px solid var(--claro-borda) !important;
+      box-shadow: 0 14px 28px rgba(31, 42, 55, 0.12) !important;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .menu-item {
+      color: var(--claro-texto) !important;
+      background: #ffffff !important;
+    }
+
+    .menu-item:hover {
+      background: #f2f7ff !important;
+      color: var(--claro-azul) !important;
+    }
+
+    .topo-centro h1,
+    .topo-centro p,
+    .card-nome,
+    .card-cidade,
+    .card-codigo,
+    .card-status,
+    .topbar-titulo,
+    .playlist-header-textos h2,
+    #cidadePonto,
+    #enderecoPonto,
+    #codigoAtual,
+    .playlist-secao-topo h4,
+    .playlist-header-linha span,
+    .historico-lista,
+    .playlist-lista,
+    .status-destaque,
+    .status-topo {
+      color: var(--claro-texto) !important;
+    }
+
+    .topo-centro h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .topo-centro p {
+      margin: 4px 0 0;
       font-size: 14px;
-      font-weight: 600;
-      color: rgba(237, 242, 255, 0.95);
-      line-height: 1.3;
-      flex: 1;
-    }
-
-    .card-codigo-area {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .card-codigo {
-      padding: 5px 10px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.08);
-      color: #bcd0ff;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-    }
-
-    .btn-copiar {
-      width: 32px;
-      height: 32px;
-      border: none;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.09);
-      color: #ffffff;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.18s ease, transform 0.18s ease;
-    }
-
-    .btn-copiar:hover {
-      background: rgba(255,255,255,0.16);
-      transform: scale(1.04);
-    }
-
-    .card-acoes {
-      margin-top: 8px;
-    }
-
-    .btn-abrir {
-      width: 100%;
-      border: none;
-      border-radius: 16px;
-      padding: 16px 18px;
-      background: linear-gradient(135deg, #5c79f0 0%, #6d87f6 100%);
-      color: #ffffff;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 12px 28px rgba(92, 121, 240, 0.30);
-      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
-    }
-
-    .btn-abrir:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 16px 34px rgba(92, 121, 240, 0.36);
-      filter: brightness(1.03);
-    }
-
-    .login-screen {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      box-sizing: border-box;
-      background:
-        radial-gradient(circle at top, rgba(91, 129, 255, 0.20) 0%, rgba(255,255,255,0) 30%),
-        linear-gradient(180deg, #f7f9ff 0%, #edf3ff 100%);
-    }
-
-    .login-card {
-      width: 100%;
-      max-width: 420px;
-      padding: 32px 28px;
-      border-radius: 26px;
-      background: rgba(255,255,255,0.82);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 22px 55px rgba(15, 23, 42, 0.14);
-      border: 1px solid rgba(255,255,255,0.70);
-      box-sizing: border-box;
+      color: var(--claro-texto-suave) !important;
       text-align: center;
     }
 
-    .login-card h2 {
-      margin: 0 0 18px;
-      font-size: 28px;
-      color: #16213e;
-    }
-
-    #senhaInput {
-      width: 100%;
-      height: 50px;
-      border-radius: 14px;
-      border: 1px solid #d8e1f2;
-      padding: 0 14px;
-      font-size: 15px;
-      box-sizing: border-box;
-      outline: none;
-      margin-bottom: 14px;
+    .logo-topo-img {
+      max-height: 48px;
+      width: auto;
+      object-fit: contain;
       background: #ffffff;
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid var(--claro-borda);
     }
 
-    #senhaInput:focus {
-      border-color: #6a84f3;
-      box-shadow: 0 0 0 4px rgba(106, 132, 243, 0.14);
+    .status-topo {
+      background: #ecfdf5 !important;
+      color: #0f8a5f !important;
+      border: 1px solid #b7ebd2 !important;
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
-    #btnLogin {
-      width: 100%;
-      height: 50px;
-      border: none;
+    .card-status-topo,
+    .playlist-topbar,
+    .playlist-header,
+    .playlist-header-linha {
+      background: transparent !important;
+      border-color: var(--claro-borda) !important;
+    }
+
+    .card-imagem-box,
+    .playlist-imagem-box,
+    .edit-imagem-box {
+      background: #f7faff !important;
+      border: 1px solid var(--claro-borda) !important;
+      border-radius: 16px;
+    }
+
+    .card-imagem,
+    #imagemPonto,
+    #previewImagem {
       border-radius: 14px;
-      background: linear-gradient(135deg, #193b8c 0%, #5c79f0 100%);
-      color: #ffffff;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 14px 28px rgba(25, 59, 140, 0.22);
     }
 
-    .login-erro {
-      min-height: 20px;
-      margin: 12px 0 0;
-      color: #dc2626;
-      font-size: 14px;
+    .btn-abrir,
+    #btnLogin,
+    #btnSalvarEdicao,
+    .btn-secundario,
+    .btn-copiar,
+    .btn-copiar-playlist {
+      border-radius: 12px !important;
+      border: 1px solid var(--claro-borda) !important;
+      box-shadow: none !important;
+    }
+
+    .btn-abrir,
+    #btnLogin,
+    #btnSalvarEdicao {
+      background: var(--claro-azul) !important;
+      color: #ffffff !important;
+      border-color: var(--claro-azul) !important;
+    }
+
+    .btn-abrir:hover,
+    #btnLogin:hover,
+    #btnSalvarEdicao:hover {
+      background: var(--claro-azul-hover) !important;
+      border-color: var(--claro-azul-hover) !important;
+    }
+
+    .btn-secundario,
+    .btn-copiar,
+    .btn-copiar-playlist,
+    #btnFecharModal {
+      background: #ffffff !important;
+      color: var(--claro-texto) !important;
+    }
+
+    input,
+    input[type="text"],
+    input[type="password"],
+    input[type="file"] {
+      background: #ffffff !important;
+      color: var(--claro-texto) !important;
+      border: 1px solid var(--claro-borda) !important;
+      border-radius: 12px !important;
+    }
+
+    input::placeholder {
+      color: #8a98aa !important;
+    }
+
+    .playlist-layout-novo,
+    .playlist-coluna-ativa,
+    .playlist-coluna-historico {
+      background: transparent !important;
+    }
+
+    .playlist-secao {
+      background: #ffffff !important;
+    }
+
+    .playlist-secao-ativa,
+    .playlist-secao-historico {
+      background: #ffffff !important;
+    }
+
+    .playlist-header-linha {
+      background: #f7faff !important;
+      border: 1px solid var(--claro-borda) !important;
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+
+    #playlistAtiva,
+    #historicoEncerramento,
+    #historicoStatus {
+      background: #fcfdff !important;
+      border: 1px solid var(--claro-borda) !important;
+      border-radius: 14px;
+    }
+
+    .status-bolinha {
+      background: var(--claro-verde) !important;
+      box-shadow: 0 0 0 4px rgba(31, 169, 113, 0.14);
+    }
+
+    #statusPonto {
+      background: #ecfdf5 !important;
+      border: 1px solid #b7ebd2 !important;
+      color: #0f8a5f !important;
+      border-radius: 999px;
+      padding: 8px 14px;
       font-weight: 700;
     }
 
     @media (max-width: 980px) {
-      .novo-topo {
+      .topo-fixo.novo-topo {
         flex-direction: column;
-        text-align: center;
+        align-items: stretch;
+      }
+
+      .topo-centro {
+        justify-content: flex-start;
+      }
+
+      .topo-centro p {
+        text-align: left;
       }
 
       .topo-direita {
-        align-items: center;
-      }
-
-      .painel-shell,
-      .novo-topo {
-        width: calc(100% - 28px);
-      }
-
-      .pontos-box {
-        justify-content: center;
+        justify-content: space-between;
       }
     }
   </style>
 </head>
-
 <body>
+
   <div id="loginBox" class="login-screen">
     <div class="login-card">
       <h2>Acesso ao Painel</h2>
@@ -364,11 +308,26 @@
   <div id="conteudoPainel" style="display:none;">
 
     <div class="topo-fixo novo-topo">
-      <div class="topo-esquerda"></div>
+      <div class="topo-esquerda">
+        <div class="menu-topo-wrap">
+          <div class="menu-topo-btn">☰ Menu</div>
+
+          <div class="menu-topo-dropdown">
+            <a class="menu-item" href="/central-clientes">Clientes</a>
+            <a class="menu-item" href="/contratos">Contratos</a>
+            <a class="menu-item" href="#">Downloads</a>
+            <a class="menu-item" href="#">Financeiro</a>
+            <a class="menu-item" href="#">Relatórios</a>
+            <a class="menu-item" href="#">Configuração</a>
+          </div>
+        </div>
+      </div>
 
       <div class="topo-centro">
-        <h1>Gerenciador de Pontos</h1>
-        <p>Gerencie seus pontos e playlists.</p>
+        <div>
+          <h1>Gerenciador de Pontos</h1>
+          <p>Gerencie seus pontos e playlists.</p>
+        </div>
       </div>
 
       <div class="topo-direita">
@@ -380,25 +339,28 @@
     <div class="painel-shell">
       <div id="listaPontos">
         <div class="pontos-box">
-
           <div class="card-ponto" data-codigo="H4E9L2A">
             <div class="card-status-topo">
               <span class="status-bolinha"></span>
               <span class="card-status">Status...</span>
             </div>
+
             <div class="card-imagem-box">
               <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
             </div>
+
             <div class="card-conteudo">
               <div class="card-nome">Carregando...</div>
               <div class="card-info-linha">
                 <div class="card-cidade">Cidade não definida</div>
+
                 <div class="card-codigo-area">
                   <div class="card-codigo">H4E9L2A</div>
-                  <button class="btn-copiar" data-codigo="H4E9L2A" type="button">⧉</button>
+                  <button class="btn-copiar" data-codigo="H4E9L2A" title="Copiar código" type="button">⧉</button>
                 </div>
               </div>
             </div>
+
             <div class="card-acoes">
               <button class="btn-abrir" data-codigo="H4E9L2A" type="button">Abrir pasta</button>
             </div>
@@ -409,19 +371,23 @@
               <span class="status-bolinha"></span>
               <span class="card-status">Status...</span>
             </div>
+
             <div class="card-imagem-box">
               <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
             </div>
+
             <div class="card-conteudo">
               <div class="card-nome">Carregando...</div>
               <div class="card-info-linha">
                 <div class="card-cidade">Cidade não definida</div>
+
                 <div class="card-codigo-area">
                   <div class="card-codigo">N7H3E8L</div>
-                  <button class="btn-copiar" data-codigo="N7H3E8L" type="button">⧉</button>
+                  <button class="btn-copiar" data-codigo="N7H3E8L" title="Copiar código" type="button">⧉</button>
                 </div>
               </div>
             </div>
+
             <div class="card-acoes">
               <button class="btn-abrir" data-codigo="N7H3E8L" type="button">Abrir pasta</button>
             </div>
@@ -432,19 +398,23 @@
               <span class="status-bolinha"></span>
               <span class="card-status">Status...</span>
             </div>
+
             <div class="card-imagem-box">
               <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
             </div>
+
             <div class="card-conteudo">
               <div class="card-nome">Carregando...</div>
               <div class="card-info-linha">
                 <div class="card-cidade">Cidade não definida</div>
+
                 <div class="card-codigo-area">
                   <div class="card-codigo">E2A6H9N</div>
-                  <button class="btn-copiar" data-codigo="E2A6H9N" type="button">⧉</button>
+                  <button class="btn-copiar" data-codigo="E2A6H9N" title="Copiar código" type="button">⧉</button>
                 </div>
               </div>
             </div>
+
             <div class="card-acoes">
               <button class="btn-abrir" data-codigo="E2A6H9N" type="button">Abrir pasta</button>
             </div>
@@ -455,32 +425,233 @@
               <span class="status-bolinha"></span>
               <span class="card-status">Status...</span>
             </div>
+
             <div class="card-imagem-box">
               <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
             </div>
+
             <div class="card-conteudo">
               <div class="card-nome">Carregando...</div>
               <div class="card-info-linha">
                 <div class="card-cidade">Cidade não definida</div>
+
                 <div class="card-codigo-area">
                   <div class="card-codigo">L8E1N5A</div>
-                  <button class="btn-copiar" data-codigo="L8E1N5A" type="button">⧉</button>
+                  <button class="btn-copiar" data-codigo="L8E1N5A" title="Copiar código" type="button">⧉</button>
                 </div>
               </div>
             </div>
+
             <div class="card-acoes">
               <button class="btn-abrir" data-codigo="L8E1N5A" type="button">Abrir pasta</button>
             </div>
           </div>
 
+          <div class="card-ponto" data-codigo="H6N4E7A">
+            <div class="card-status-topo">
+              <span class="status-bolinha"></span>
+              <span class="card-status">Status...</span>
+            </div>
+
+            <div class="card-imagem-box">
+              <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
+            </div>
+
+            <div class="card-conteudo">
+              <div class="card-nome">Carregando...</div>
+              <div class="card-info-linha">
+                <div class="card-cidade">Cidade não definida</div>
+
+                <div class="card-codigo-area">
+                  <div class="card-codigo">H6N4E7A</div>
+                  <button class="btn-copiar" data-codigo="H6N4E7A" title="Copiar código" type="button">⧉</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-acoes">
+              <button class="btn-abrir" data-codigo="H6N4E7A" type="button">Abrir pasta</button>
+            </div>
+          </div>
+
+          <div class="card-ponto" data-codigo="A9L3E2H">
+            <div class="card-status-topo">
+              <span class="status-bolinha"></span>
+              <span class="card-status">Status...</span>
+            </div>
+
+            <div class="card-imagem-box">
+              <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
+            </div>
+
+            <div class="card-conteudo">
+              <div class="card-nome">Carregando...</div>
+              <div class="card-info-linha">
+                <div class="card-cidade">Cidade não definida</div>
+
+                <div class="card-codigo-area">
+                  <div class="card-codigo">A9L3E2H</div>
+                  <button class="btn-copiar" data-codigo="A9L3E2H" title="Copiar código" type="button">⧉</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-acoes">
+              <button class="btn-abrir" data-codigo="A9L3E2H" type="button">Abrir pasta</button>
+            </div>
+          </div>
+
+          <div class="card-ponto" data-codigo="E5H8A1N">
+            <div class="card-status-topo">
+              <span class="status-bolinha"></span>
+              <span class="card-status">Status...</span>
+            </div>
+
+            <div class="card-imagem-box">
+              <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
+            </div>
+
+            <div class="card-conteudo">
+              <div class="card-nome">Carregando...</div>
+              <div class="card-info-linha">
+                <div class="card-cidade">Cidade não definida</div>
+
+                <div class="card-codigo-area">
+                  <div class="card-codigo">E5H8A1N</div>
+                  <button class="btn-copiar" data-codigo="E5H8A1N" title="Copiar código" type="button">⧉</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-acoes">
+              <button class="btn-abrir" data-codigo="E5H8A1N" type="button">Abrir pasta</button>
+            </div>
+          </div>
+
+          <div class="card-ponto" data-codigo="N2E7L4A">
+            <div class="card-status-topo">
+              <span class="status-bolinha"></span>
+              <span class="card-status">Status...</span>
+            </div>
+
+            <div class="card-imagem-box">
+              <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
+            </div>
+
+            <div class="card-conteudo">
+              <div class="card-nome">Carregando...</div>
+              <div class="card-info-linha">
+                <div class="card-cidade">Cidade não definida</div>
+
+                <div class="card-codigo-area">
+                  <div class="card-codigo">N2E7L4A</div>
+                  <button class="btn-copiar" data-codigo="N2E7L4A" title="Copiar código" type="button">⧉</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-acoes">
+              <button class="btn-abrir" data-codigo="N2E7L4A" type="button">Abrir pasta</button>
+            </div>
+          </div>
         </div>
       </div>
 
       <div id="pontoDetalhe" class="playlist-box" style="display:none;">
-        <!-- restante mantido igual -->
+        <div class="playlist-topbar playlist-topbar-novo">
+          <div class="topbar-esquerda">
+            <button id="btnVoltar" type="button" class="btn-secundario btn-voltar-topo">← Voltar</button>
+            <span class="topbar-titulo">Gerencie e organize a sua playlist</span>
+          </div>
+
+          <div class="topbar-direita">
+            <div id="statusPonto" class="status-destaque"></div>
+          </div>
+        </div>
+
+        <div class="playlist-header playlist-header-novo">
+          <div class="playlist-topo-flex">
+            <div class="playlist-imagem-box">
+              <img id="imagemPonto" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
+            </div>
+
+            <div class="playlist-header-textos">
+              <h2 id="tituloPasta"></h2>
+
+              <div class="playlist-info-extra">
+                <div id="cidadePonto" class="playlist-info-item"></div>
+                <div id="enderecoPonto" class="playlist-info-item"></div>
+              </div>
+
+              <div class="playlist-codigo-linha">
+                <span id="codigoAtual"></span>
+                <button id="btnCopiarCodigo" type="button" class="btn-copiar-playlist" title="Copiar código">⧉</button>
+              </div>
+
+              <div class="playlist-acoes-topo">
+                <button id="btnEditarInfo" type="button" class="btn-secundario">Editar informações</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="playlist-layout-novo">
+          <div class="playlist-coluna-ativa">
+            <div class="playlist-secao playlist-secao-ativa">
+              <div class="playlist-secao-topo">
+                <h4>Playlist ativa</h4>
+              </div>
+
+              <div class="playlist-header-linha">
+                <span>#</span>
+                <span>Arquivo</span>
+                <span>Postado</span>
+                <span>Encerramento</span>
+                <span></span>
+              </div>
+
+              <div id="playlistAtiva" class="playlist-lista"></div>
+            </div>
+          </div>
+
+          <div class="playlist-coluna-historico">
+            <div class="playlist-secao playlist-secao-historico">
+              <div class="playlist-secao-topo">
+                <h4>Histórico de encerramento</h4>
+              </div>
+              <div id="historicoEncerramento" class="historico-lista"></div>
+            </div>
+
+            <div class="playlist-secao playlist-secao-historico">
+              <div class="playlist-secao-topo">
+                <h4>Histórico de status</h4>
+              </div>
+              <div id="historicoStatus" class="historico-lista"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
+    <div id="modalEditar" class="modal-editar" style="display:none;">
+      <div class="modal-conteudo">
+        <h3>Editar Informações</h3>
+
+        <input type="text" id="editNome" placeholder="Nome do ponto">
+        <input type="text" id="editCidade" placeholder="Cidade">
+        <input type="text" id="editEndereco" placeholder="Endereço">
+
+        <div class="edit-imagem-box">
+          <img id="previewImagem" src="" alt="Preview da imagem">
+          <input type="file" id="inputImagem" accept="image/*">
+        </div>
+
+        <div class="edit-botoes">
+          <button id="btnSalvarEdicao" type="button">Salvar</button>
+          <button id="btnFecharModal" type="button">Cancelar</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

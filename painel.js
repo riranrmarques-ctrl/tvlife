@@ -648,15 +648,11 @@ if (btnUpgrade && inputUpgrade) {
       const upload = await uploadArquivoPlaylist(arquivo, codigoSelecionado);
 
       const payload = {
-        codigo: codigoSelecionado,
-        nome: arquivo.name,
-        tipo,
-        arquivo_url: upload.url,
-        caminho_storage: upload.caminho,
-        mime_type: arquivo.type || null,
-        tamanho_bytes: Number.isFinite(arquivo.size) ? arquivo.size : null,
-        ordem,
-        data_fim: dataFim
+      codigo: codigoSelecionado,
+      nome: arquivo.name,
+      arquivo_url: upload.url,
+      ordem: ordem,
+      data_fim: null
       };
 
       const { error } = await supabaseClient

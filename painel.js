@@ -5,7 +5,6 @@ const TABELA = "playlists";
 const TABELA_PONTOS = "pontos";
 const TABELA_HISTORICO_CONEXAO = "historico_conexao";
 
-// 🔒 SENHA ATUALIZADA
 const SENHA_PAINEL = "videolife";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -64,11 +63,6 @@ function obterImagemPonto(ponto) {
   return ponto?.imagem_url || "https://placehold.co/600x320/png";
 }
 
-function obterCidadeFormatada(cidade) {
-  const nome = String(cidade || "").trim();
-  return nome ? `Cidade de ${nome}` : "Cidade não definida";
-}
-
 function obterCidadeComNomeEmNegrito(cidade) {
   const nome = String(cidade || "").trim();
   return nome ? `Cidade de <strong>${escapeHtml(nome)}</strong>` : "Cidade não definida";
@@ -76,42 +70,112 @@ function obterCidadeComNomeEmNegrito(cidade) {
 
 function calcularStatusInfo(ponto) {
   if (!ponto?.ultimo_ping) {
-    return {
-      texto: "Inativo",
-      detalhe: "sem histórico",
-      ativo: false,
-      classe: "inativo"
-    };
+    return { texto: "Inativo", ativo: false, classe: "inativo" };
   }
 
   const dataPing = new Date(ponto.ultimo_ping);
   if (Number.isNaN(dataPing.getTime())) {
-    return {
-      texto: "Inativo",
-      detalhe: "sem histórico",
-      ativo: false,
-      classe: "inativo"
-    };
+    return { texto: "Inativo", ativo: false, classe: "inativo" };
   }
 
   const diff = Date.now() - dataPing.getTime();
-  const horario = dataPing.toLocaleString("pt-BR");
 
   if (diff < 5 * 60 * 1000) {
-    return {
-      texto: "Ativo",
-      detalhe: horario,
-      ativo: true,
-      classe: "ativo"
-    };
+    return { texto: "Ativo", ativo: true, classe: "ativo" };
   }
 
-  return {
-    texto: "Inativo",
-    detalhe: horario,
-    ativo: false,
-    classe: "inativo"
-  };
+  return { texto: "Inativo", ativo: false, classe: "inativo" };
 }
 
-// (resto do código permanece 100% igual ao seu — não alterei nada)
+function aplicarPosicaoImagem(el, posicao) {
+  if (!el || !posicao) return;
+  el.style.objectPosition = `${posicao.x}% ${posicao.y}%`;
+}
+
+function validarLogin() {
+  if (!senhaInput || senhaInput.value.trim() !== SENHA_PAINEL) {
+    if (loginErro) loginErro.textContent = "Código inválido";
+    return;
+  }
+
+  if (loginErro) loginErro.textContent = "";
+  if (loginBox) loginBox.style.display = "none";
+  if (conteudoPainel) conteudoPainel.style.display = "block";
+
+  setStatus("Painel Ativo", "ok");
+  iniciarPainel();
+}
+
+if (btnLogin) {
+  btnLogin.onclick = validarLogin;
+}
+
+if (senhaInput) {
+  senhaInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") validarLogin();
+  });
+}
+
+async function buscarPontos() {
+  const { data } = await supabaseClient.from(TABELA_PONTOS).select("*");
+  return data || [];
+}
+
+function renderizarCardsPontos(lista) {
+  pontosMap = {};
+  lista.forEach(p => {
+    pontosMap[p.codigo] = p;
+  });
+
+  document.querySelectorAll(".card-ponto").forEach(card => {
+    const codigo = card.dataset.codigo;
+    const ponto = pontosMap[codigo] || {};
+
+    const nomeEl = card.querySelector(".card-nome");
+    const cidadeEl = card.querySelector(".card-cidade");
+    const statusElCard = card.querySelector(".card-status");
+    const bolinhaEl = card.querySelector(".status-bolinha");
+    const imagemEl = card.querySelector(".card-imagem");
+
+    const statusInfo = calcularStatusInfo(ponto);
+
+    if (nomeEl) nomeEl.innerHTML = `<strong>${ponto.nome || codigo}</strong>`;
+    if (cidadeEl) cidadeEl.innerHTML = obterCidadeComNomeEmNegrito(ponto.cidade);
+
+    if (statusElCard) {
+      statusElCard.textContent = statusInfo.texto;
+      statusElCard.classList.toggle("ativo", statusInfo.ativo);
+    }
+
+    if (bolinhaEl) {
+      bolinhaEl.classList.toggle("ativo", statusInfo.ativo);
+    }
+
+    if (imagemEl) {
+      imagemEl.src = obterImagemPonto(ponto);
+    }
+  });
+}
+
+function abrirPonto(codigo) {
+  codigoSelecionado = codigo;
+
+  if (listaPontos) listaPontos.style.display = "none";
+  if (pontoDetalhe) pontoDetalhe.style.display = "block";
+}
+
+async function iniciarPainel() {
+  const pontos = await buscarPontos();
+  renderizarCardsPontos(pontos);
+
+  document.querySelectorAll(".btn-abrir").forEach(btn => {
+    btn.onclick = () => abrirPonto(btn.dataset.codigo);
+  });
+
+  document.querySelectorAll(".btn-copiar").forEach(btn => {
+    btn.onclick = async () => {
+      await navigator.clipboard.writeText(btn.dataset.codigo);
+      setStatus("Código copiado", "ok");
+    };
+  });
+}

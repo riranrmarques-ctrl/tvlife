@@ -1,1 +1,40 @@
-{\rtf1}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duna TV</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="logo-top">
+    <img src="logo.png" alt="Duna TV">
+  </div>
+
+  <main class="center-box">
+    <div class="card">
+
+      <h1>Painel de Acesso</h1>
+      <p class="sub">Acesso para a reprodução de pontos de tela</p>
+
+      <form id="codeForm" novalidate>
+        <input id="dispositivo" type="text" placeholder="Nome do dispositivo (opcional)" autocomplete="off">
+        <input id="codigo" type="text" placeholder="Código do estabelecimento" autocomplete="off" required>
+        <button type="submit">Entrar</button>
+      </form>
+
+      <p id="mensagem" class="mensagem"></p>
+      <p id="contadorTexto" class="contador hidden"></p>
+
+    </div>
+  </main>
+
+  <div class="footer">
+    Central de Suporte<br>
+    (73) 98188-8817
+  </div>
+
+  <script src="app.js?v=2"></script>
+</body>
+</html>

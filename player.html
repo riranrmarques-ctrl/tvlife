@@ -1,1 +1,58 @@
-{\rtf1}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duna TV Player</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+
+    .player-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
+
+    .mensagem {
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 24px;
+      text-align: center;
+      padding: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="player-container">
+    <video 
+      id="videoPlayer" 
+      autoplay 
+      muted 
+      playsinline
+    ></video>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="player.js?v=2"></script>
+
+</body>
+</html>

@@ -45,6 +45,8 @@ let statusAnteriorMap = {};
 let posicaoImagemAtual = { x: 50, y: 50 };
 let arrastandoPreview = false;
 
+let playlistSchema = null;
+
 function setStatus(texto, tipo = "normal") {
   if (!statusEl) return;
   statusEl.textContent = texto;
@@ -123,13 +125,26 @@ function formatarDataHora(valor) {
   return data.toLocaleString("pt-BR");
 }
 
+function obterDataFimItem(item) {
+  return item?.data_fim || item?.data_encerramento || null;
+}
+
+function obterNomeItem(item) {
+  return item?.nome || item?.nome_arquivo || "Arquivo";
+}
+
+function obterDataCriacaoItem(item) {
+  return item?.created_at || item?.data_postagem || null;
+}
+
 function itemEstaInativo(item) {
-  if (!item?.data_fim) return false;
+  const dataFimItem = obterDataFimItem(item);
+  if (!dataFimItem) return false;
 
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
 
-  const fim = new Date(item.data_fim);
+  const fim = new Date(dataFimItem);
   if (Number.isNaN(fim.getTime())) return false;
 
   fim.setHours(23, 59, 59, 999);
@@ -254,11 +269,73 @@ async function uploadArquivoPlaylist(file, codigo) {
   };
 }
 
+async function detectarSchemaPlaylist() {
+  if (playlistSchema) return playlistSchema;
+
+  const schema = {
+    tipo: "novo",
+    campoCodigo: "codigo",
+    campoNome: "nome",
+    campoDataFim: "data_fim",
+    campoDataCriacao: "created_at",
+    temOrdem: false,
+    temCaminhoStorage: false,
+    temAtivo: false
+  };
+
+  const testeLegado = await supabaseClient
+    .from(TABELA)
+    .select("id,codigo_ponto,nome_arquivo,arquivo_url,data_postagem,data_encerramento", { head: false })
+    .limit(1);
+
+  if (!testeLegado.error) {
+    schema.tipo = "legado";
+    schema.campoCodigo = "codigo_ponto";
+    schema.campoNome = "nome_arquivo";
+    schema.campoDataFim = "data_encerramento";
+    schema.campoDataCriacao = "data_postagem";
+  }
+
+  const testeOrdem = await supabaseClient
+    .from(TABELA)
+    .select("ordem", { head: false })
+    .limit(1);
+
+  if (!testeOrdem.error) {
+    schema.temOrdem = true;
+  }
+
+  const testeCaminho = await supabaseClient
+    .from(TABELA)
+    .select("caminho_storage", { head: false })
+    .limit(1);
+
+  if (!testeCaminho.error) {
+    schema.temCaminhoStorage = true;
+  }
+
+  const testeAtivo = await supabaseClient
+    .from(TABELA)
+    .select("ativo", { head: false })
+    .limit(1);
+
+  if (!testeAtivo.error) {
+    schema.temAtivo = true;
+  }
+
+  playlistSchema = schema;
+  return playlistSchema;
+}
+
 async function obterProximaOrdemPlaylist(codigo) {
+  const schema = await detectarSchemaPlaylist();
+
+  if (!schema.temOrdem) return 0;
+
   const { data, error } = await supabaseClient
     .from(TABELA)
     .select("ordem")
-    .eq("codigo", codigo)
+    .eq(schema.campoCodigo, codigo)
     .order("ordem", { ascending: false })
     .limit(1);
 
@@ -629,17 +706,31 @@ if (btnUpgrade && inputUpgrade) {
     try {
       setStatus("Enviando material...", "normal");
 
+      const schema = await detectarSchemaPlaylist();
       const ordem = await obterProximaOrdemPlaylist(codigoSelecionado);
       const upload = await uploadArquivoPlaylist(arquivo, codigoSelecionado);
 
       const payload = {
-        codigo: codigoSelecionado,
-        nome: arquivo.name,
-        arquivo_url: upload.url,
-caminho_storage: upload.caminho,
-        ordem: ordem,
-        data_fim: null
+        [schema.campoCodigo]: codigoSelecionado,
+        [schema.campoNome]: arquivo.name,
+        arquivo_url: upload.url
       };
+
+      if (schema.temCaminhoStorage) {
+        payload.caminho_storage = upload.caminho;
+      }
+
+      if (schema.temOrdem) {
+        payload.ordem = ordem;
+      }
+
+      if (schema.campoDataFim) {
+        payload[schema.campoDataFim] = null;
+      }
+
+      if (schema.temAtivo) {
+        payload.ativo = true;
+      }
 
       const { error } = await supabaseClient
         .from(TABELA)
@@ -678,21 +769,25 @@ function montarAcoesPlaylist(item) {
 }
 
 function montarNomePlaylist(item) {
-  return escapeHtml(item.nome || "Arquivo");
+  return escapeHtml(obterNomeItem(item));
 }
 
 function montarItemPlaylist(item, index) {
+  const podeOrdenar = Boolean(playlistSchema?.temOrdem);
+  const dataCriacao = obterDataCriacaoItem(item);
+  const dataFim = obterDataFimItem(item);
+
   return `
-    <div class="playlist-item" draggable="true" data-index="${index}" data-id="${item.id}">
+    <div class="playlist-item" draggable="${podeOrdenar ? "true" : "false"}" data-index="${index}" data-id="${item.id}">
       <div class="playlist-item-linha">
-        <div class="playlist-item-handle" title="Arrastar">⋮⋮</div>
+        <div class="playlist-item-handle" title="Arrastar">${podeOrdenar ? "⋮⋮" : ""}</div>
         <div class="playlist-item-ordem">${index + 1}.</div>
-        <div class="playlist-item-nome" title="${escapeHtml(item.nome)}">${montarNomePlaylist(item)}</div>
+        <div class="playlist-item-nome" title="${escapeHtml(obterNomeItem(item))}">${montarNomePlaylist(item)}</div>
         <div class="playlist-item-data playlist-item-postado">
-          ${formatarDataHora(item.created_at)}
+          ${formatarDataHora(dataCriacao)}
         </div>
         <div class="playlist-item-data playlist-item-encerramento">
-          ${item.data_fim ? formatarData(item.data_fim) : ""}
+          ${dataFim ? formatarData(dataFim) : ""}
         </div>
         ${montarAcoesPlaylist(item)}
       </div>
@@ -704,8 +799,8 @@ function montarItemHistoricoEncerramento(item, index) {
   return `
     <div class="historico-item">
       <span class="historico-item-ordem">${index + 1}.</span>
-      <span class="historico-item-nome">${escapeHtml(item.nome)}</span>
-      <span class="historico-item-valor">${formatarData(item.data_fim)}</span>
+      <span class="historico-item-nome">${escapeHtml(obterNomeItem(item))}</span>
+      <span class="historico-item-valor">${formatarData(obterDataFimItem(item))}</span>
     </div>
   `;
 }
@@ -741,13 +836,21 @@ function obterContainerHistoricoStatus() {
 async function carregarPlaylist() {
   if (!codigoSelecionado) return;
 
-  const [{ data: playlistData, error: playlistError }, { data: historicoData, error: historicoError }] = await Promise.all([
-    supabaseClient
-      .from(TABELA)
-      .select("*")
-      .eq("codigo", codigoSelecionado)
-      .order("ordem", { ascending: true }),
+  const schema = await detectarSchemaPlaylist();
 
+  const queryPlaylist = supabaseClient
+    .from(TABELA)
+    .select("*")
+    .eq(schema.campoCodigo, codigoSelecionado);
+
+  if (schema.temOrdem) {
+    queryPlaylist.order("ordem", { ascending: true });
+  } else {
+    queryPlaylist.order(schema.campoDataCriacao, { ascending: true });
+  }
+
+  const [{ data: playlistData, error: playlistError }, { data: historicoData, error: historicoError }] = await Promise.all([
+    queryPlaylist,
     supabaseClient
       .from(TABELA_HISTORICO_CONEXAO)
       .select("*")
@@ -794,7 +897,10 @@ async function carregarPlaylist() {
       : `<div class="playlist-vazia">Sem histórico</div>`;
   }
 
-  ativarDrag(ativos);
+  if (schema.temOrdem) {
+    ativarDrag(ativos);
+  }
+
   ativarExclusaoItens();
 }
 
@@ -809,14 +915,18 @@ function ativarExclusaoItens() {
       const confirmar = window.confirm("Deseja excluir este item da playlist?");
       if (!confirmar) return;
 
-      const { data: itemData } = await supabaseClient
-        .from(TABELA)
-        .select("caminho_storage")
-        .eq("id", id)
-        .single();
+      const schema = await detectarSchemaPlaylist();
 
-      if (itemData?.caminho_storage) {
-        await supabaseClient.storage.from(BUCKET).remove([itemData.caminho_storage]);
+      if (schema.temCaminhoStorage) {
+        const { data: itemData } = await supabaseClient
+          .from(TABELA)
+          .select("caminho_storage")
+          .eq("id", id)
+          .single();
+
+        if (itemData?.caminho_storage) {
+          await supabaseClient.storage.from(BUCKET).remove([itemData.caminho_storage]);
+        }
       }
 
       const { error } = await supabaseClient
@@ -875,6 +985,12 @@ function ativarDrag(lista) {
       item.classList.remove("drag-over");
       item.classList.add("drop-animating");
 
+      const schema = await detectarSchemaPlaylist();
+      if (!schema.temOrdem) {
+        item.classList.remove("drop-animating");
+        return;
+      }
+
       const target = Number(item.dataset.index);
       if (Number.isNaN(dragIndex) || Number.isNaN(target) || dragIndex === target) {
         item.classList.remove("drop-animating");
@@ -909,6 +1025,8 @@ function ativarDrag(lista) {
 }
 
 async function iniciarPainel() {
+  await detectarSchemaPlaylist();
+
   const pontos = await buscarPontos();
   renderizarCardsPontos(pontos);
 

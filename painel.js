@@ -1,7 +1,7 @@
 const SUPABASE_URL = "https://dfzvmambzhhsijopcizk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_gSPO1gNfcdy3JNOxMprCbg_Wca6u6WQ";
 const BUCKET = "pontos";
-const TABELA = "playlists";
+const TABELA = "playlists_novo";
 const TABELA_PONTOS = "pontos";
 const TABELA_HISTORICO_CONEXAO = "historico_conexao";
 
@@ -134,7 +134,7 @@ function obterNomeItem(item) {
 }
 
 function obterDataCriacaoItem(item) {
-  return item?.created_at || item?.data_postagem || null;
+  return item?.created_at || item?.criado_em || item?.data_postagem || null;
 }
 
 function itemEstaInativo(item) {
@@ -294,6 +294,74 @@ async function detectarSchemaPlaylist() {
     schema.campoNome = "nome_arquivo";
     schema.campoDataFim = "data_encerramento";
     schema.campoDataCriacao = "data_postagem";
+  } else {
+    const testeCodigo = await supabaseClient
+      .from(TABELA)
+      .select("codigo", { head: false })
+      .limit(1);
+
+    if (testeCodigo.error) {
+      const testeCodigoPonto = await supabaseClient
+        .from(TABELA)
+        .select("codigo_ponto", { head: false })
+        .limit(1);
+
+      if (!testeCodigoPonto.error) {
+        schema.campoCodigo = "codigo_ponto";
+      }
+    }
+
+    const testeNome = await supabaseClient
+      .from(TABELA)
+      .select("nome", { head: false })
+      .limit(1);
+
+    if (testeNome.error) {
+      const testeNomeArquivo = await supabaseClient
+        .from(TABELA)
+        .select("nome_arquivo", { head: false })
+        .limit(1);
+
+      if (!testeNomeArquivo.error) {
+        schema.campoNome = "nome_arquivo";
+      }
+    }
+
+    const testeDataFim = await supabaseClient
+      .from(TABELA)
+      .select("data_fim", { head: false })
+      .limit(1);
+
+    if (testeDataFim.error) {
+      const testeDataEncerramento = await supabaseClient
+        .from(TABELA)
+        .select("data_encerramento", { head: false })
+        .limit(1);
+
+      if (!testeDataEncerramento.error) {
+        schema.campoDataFim = "data_encerramento";
+      } else {
+        schema.campoDataFim = null;
+      }
+    }
+
+    const testeCreatedAt = await supabaseClient
+      .from(TABELA)
+      .select("created_at", { head: false })
+      .limit(1);
+
+    if (testeCreatedAt.error) {
+      const testeCriadoEm = await supabaseClient
+        .from(TABELA)
+        .select("criado_em", { head: false })
+        .limit(1);
+
+      if (!testeCriadoEm.error) {
+        schema.campoDataCriacao = "criado_em";
+      } else {
+        schema.campoDataCriacao = null;
+      }
+    }
   }
 
   const testeOrdem = await supabaseClient
@@ -845,7 +913,7 @@ async function carregarPlaylist() {
 
   if (schema.temOrdem) {
     queryPlaylist.order("ordem", { ascending: true });
-  } else {
+  } else if (schema.campoDataCriacao) {
     queryPlaylist.order(schema.campoDataCriacao, { ascending: true });
   }
 

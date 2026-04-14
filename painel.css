@@ -1,76 +1,90 @@
-/* RESET */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-/* VARIÁVEIS - MODO CLARO */
 :root {
   --bg-1: #ffffff;
   --bg-2: #f5f7fb;
   --card: #ffffff;
   --card-2: #ffffff;
-  --line: rgba(0, 0, 0, 0.08);
+  --line: rgba(0,0,0,0.08);
   --text: #0f172a;
   --muted: #64748b;
-  --primary: #5f7cff;
-  --primary-hover: #728cff;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
   --success: #16a34a;
   --danger: #dc2626;
   --warning: #f59e0b;
 }
 
-/* BODY */
 body {
-  min-height: 100vh;
-  font-family: Arial, sans-serif;
+  background: #ffffff;
   color: var(--text);
-  background: var(--bg-2);
-  padding: 28px 18px 60px;
 }
 
 /* LOGIN */
 .login-card {
-  background: #fff;
+  background: #ffffff;
   border: 1px solid var(--line);
+}
+
+.login-card input {
+  background: #f1f5f9;
+  color: #000;
+}
+
+.login-card button {
+  background: var(--primary);
 }
 
 /* TOPO */
-.topo-fixo.novo-topo {
+.topo-fixo {
   background: #ffffff;
 }
 
-/* CONTAINER PRINCIPAL */
-.pontos-box {
+.topo-centro h1 {
+  color: #0f172a;
+}
+
+.topo-centro p {
+  color: var(--muted);
+}
+
+/* MENU */
+.menu-topo-btn {
+  background: #e2e8f0;
+  color: #000;
+}
+
+.menu-topo-dropdown {
   background: #ffffff;
   border: 1px solid var(--line);
 }
 
-/* CARD PONTO */
-.card-ponto {
-  background: #ffffff;
-  border: 1px solid var(--line);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+.menu-item {
+  color: #0f172a;
 }
 
-/* STATUS */
-.status-bolinha.ativo {
-  background: #16a34a;
-}
-
-.status-bolinha.inativo {
-  background: #dc2626;
-}
-
-/* IMAGEM */
-.card-imagem-box {
+.menu-item:hover {
   background: #f1f5f9;
 }
 
-/* TEXTO */
+/* CARDS */
+.pontos-box {
+  background: #ffffff;
+}
+
+.card-ponto {
+  background: #ffffff;
+  border: 1px solid var(--line);
+}
+
+.card-nome {
+  color: #0f172a;
+}
+
 .card-cidade {
-  color: var(--muted);
+  color: #475569;
+}
+
+.card-imagem-box {
+  background: #e2e8f0;
 }
 
 /* BOTÕES */
@@ -82,19 +96,33 @@ body {
   background: var(--primary-hover);
 }
 
+.btn-copiar {
+  background: #e2e8f0;
+  color: #000;
+}
+
 /* PLAYLIST */
-.playlist-box,
-.upload-card,
-.playlist-area,
-.playlist-secao {
+.playlist-box {
   background: #ffffff;
   border: 1px solid var(--line);
 }
 
-/* ITENS */
+.playlist-area,
+.playlist-secao {
+  background: #ffffff;
+}
+
 .playlist-item {
   background: #ffffff;
   border: 1px solid var(--line);
+}
+
+.playlist-item-nome {
+  color: #0f172a;
+}
+
+.playlist-item-data {
+  color: var(--muted);
 }
 
 /* HISTÓRICO */
@@ -104,39 +132,23 @@ body {
   border: 1px solid var(--line);
 }
 
+/* INPUTS */
+input {
+  background: #f1f5f9;
+  color: #000;
+}
+
 /* MODAL */
 .modal-conteudo {
   background: #ffffff;
 }
 
-/* STATUS FIXO */
+#previewImagem {
+  background: #e2e8f0;
+}
+
+/* STATUS */
 .status-box {
-  background: #111;
+  background: #0f172a;
   color: #fff;
-}
-
-.status-box.ok {
-  background: var(--success);
-}
-
-.status-box.erro {
-  background: var(--danger);
-}
-
-/* SCROLL */
-::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.15);
-}
-
-/* RESPONSIVO */
-@media (max-width: 840px) {
-  .pontos-box {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 560px) {
-  .pontos-box {
-    grid-template-columns: 1fr;
-  }
 }

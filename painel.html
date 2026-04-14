@@ -1,212 +1,160 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel Indoor</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-<style>
-
-/* RESET */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-/* VARIÁVEIS - MODO CLARO */
-:root {
-  --bg-1: #ffffff;
-  --bg-2: #f5f7fb;
-  --card: #ffffff;
-  --card-2: #ffffff;
-  --line: rgba(0, 0, 0, 0.08);
-  --text: #0f172a;
-  --muted: #64748b;
-  --primary: #5f7cff;
-  --primary-hover: #728cff;
-  --success: #16a34a;
-  --danger: #dc2626;
-}
-
-/* BODY */
-body {
-  font-family: Arial, sans-serif;
-  background: var(--bg-2);
-  color: var(--text);
-  padding: 20px;
-}
-
-/* LOGIN */
-.login-screen {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.login-card {
-  background: #fff;
-  padding: 30px;
-  border-radius: 20px;
-  border: 1px solid var(--line);
-  width: 300px;
-  text-align: center;
-}
-
-.login-card input {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-}
-
-.login-card button {
-  width: 100%;
-  padding: 12px;
-  background: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-/* PAINEL */
-.pontos-box {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-/* CARD */
-.card-ponto {
-  background: #fff;
-  border-radius: 16px;
-  padding: 12px;
-  border: 1px solid var(--line);
-}
-
-.card-imagem {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 12px;
-}
-
-.card-nome {
-  font-weight: bold;
-  margin-top: 10px;
-}
-
-.card-cidade {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.btn-abrir {
-  margin-top: 10px;
-  width: 100%;
-  padding: 10px;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-/* STATUS */
-.status-topo {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #000;
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 10px;
-}
-
-/* RESPONSIVO */
-@media(max-width:900px){
-  .pontos-box{
-    grid-template-columns: repeat(2,1fr);
-  }
-}
-
-@media(max-width:500px){
-  .pontos-box{
-    grid-template-columns: 1fr;
-  }
-}
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duna Branding | Painel</title>
+  <link rel="stylesheet" href="painel.css?v=102">
 </head>
-
 <body>
 
-<!-- LOGIN -->
-<div id="loginBox" class="login-screen">
-  <div class="login-card">
-    <h2>Painel</h2>
-    <input type="password" id="senhaInput" placeholder="Digite a senha">
-    <button id="btnLogin">Entrar</button>
-    <div id="loginErro"></div>
+  <div id="loginBox" class="login-screen">
+    <div class="login-card">
+      <h2>Acesso ao Painel</h2>
+      <input type="password" id="senhaInput" placeholder="Digite o código">
+      <button id="btnLogin" type="button">Entrar</button>
+      <p id="loginErro" class="login-erro"></p>
+    </div>
+  </div>
+
+  <div id="conteudoPainel" style="display:none;">
+    
+<div class="topo-fixo novo-topo">
+
+<div class="topo-esquerda">
+  <div class="menu-topo-wrap">
+    <div class="menu-topo-btn">☰ Menu</div>
+
+    <div class="menu-topo-dropdown">
+      <a class="menu-item" href="/central-clientes">Clientes</a>
+      <a class="menu-item" href="/contratos">Contratos</a>
+      <a class="menu-item" href="#">Downloads</a>
+      <a class="menu-item" href="#">Financeiro</a>
+      <a class="menu-item" href="#">Relatórios</a>
+      <a class="menu-item" href="#">Configuração</a>
+    </div>
   </div>
 </div>
 
-<!-- PAINEL -->
-<div id="conteudoPainel" style="display:none;">
-  <h1>Pontos</h1>
-  <div class="pontos-box" id="listaPontos"></div>
+  <div class="topo-centro">
+    <h1>Gerenciador de Pontos</h1>
+    <p>Gerencie seus pontos e playlists.</p>
+  </div>
+
+  <div class="topo-direita">
+    <img src="logo.png" class="logo-topo-img" alt="Duna TV">
+    <div class="status-topo">Painel Ativo</div>
+  </div>
+
 </div>
 
-<div class="status-topo">Sistema ativo</div>
+    <div class="painel-shell">
+      <div id="listaPontos">
+        <div class="pontos-box">
 
-<script>
+          <!-- cards mantidos iguais -->
+          <!-- (todos seus cards permanecem exatamente iguais) -->
 
-/* CONFIG */
-const SUPABASE_URL = "https://dfzvmambzhhsijopcizk.supabase.co";
-const SUPABASE_KEY = "sb_publishable_gSPO1gNfcdy3JNOxMprCbg_Wca6u6WQ";
-
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const SENHA = "@Helena26";
-
-/* LOGIN */
-document.getElementById("btnLogin").onclick = () => {
-  const senha = document.getElementById("senhaInput").value;
-
-  if(senha === SENHA){
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("conteudoPainel").style.display = "block";
-    carregar();
-  } else {
-    document.getElementById("loginErro").innerText = "Senha incorreta";
-  }
-};
-
-/* CARREGAR PONTOS */
-async function carregar(){
-  const { data } = await supabaseClient.from("pontos").select("*");
-
-  const container = document.getElementById("listaPontos");
-  container.innerHTML = "";
-
-  data.forEach(p => {
-    container.innerHTML += `
-      <div class="card-ponto">
-        <img class="card-imagem" src="${p.imagem_url || 'https://placehold.co/600x300'}">
-        <div class="card-nome">${p.nome || p.codigo}</div>
-        <div class="card-cidade">${p.cidade || ''}</div>
-        <button class="btn-abrir">Abrir</button>
+        </div>
       </div>
-    `;
-  });
-}
 
-</script>
+      <div id="pontoDetalhe" class="playlist-box" style="display:none;">
+        <div class="playlist-topbar playlist-topbar-novo">
+          <div class="topbar-esquerda">
+            <button id="btnVoltar" type="button" class="btn-secundario btn-voltar-topo">← Voltar</button>
+            <span class="topbar-titulo">Gerencie e organize a sua playlist</span>
+          </div>
 
+          <div class="topbar-direita">
+            <div id="statusPonto" class="status-destaque"></div>
+          </div>
+        </div>
+
+        <div class="playlist-header playlist-header-novo">
+          <div class="playlist-topo-flex">
+            <div class="playlist-imagem-box">
+              <img id="imagemPonto" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
+            </div>
+
+            <div class="playlist-header-textos">
+              <h2 id="tituloPasta"></h2>
+
+              <div class="playlist-info-extra">
+                <div id="cidadePonto" class="playlist-info-item"></div>
+                <div id="enderecoPonto" class="playlist-info-item"></div>
+              </div>
+
+              <div class="playlist-codigo-linha">
+                <span id="codigoAtual"></span>
+                <button id="btnCopiarCodigo" type="button" class="btn-copiar-playlist" title="Copiar código">⧉</button>
+              </div>
+
+              <div class="playlist-acoes-topo">
+                <button id="btnEditarInfo" type="button" class="btn-secundario">Editar informações</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="playlist-layout-novo">
+          <div class="playlist-coluna-ativa">
+            <div class="playlist-secao playlist-secao-ativa">
+              <div class="playlist-secao-topo">
+                <h4>Playlist ativa</h4>
+              </div>
+
+              <div class="playlist-header-linha">
+                <span>#</span>
+                <span>Arquivo</span>
+                <span>Postado</span>
+                <span>Encerramento</span>
+                <span></span>
+              </div>
+
+              <div id="playlistAtiva" class="playlist-lista"></div>
+            </div>
+          </div>
+
+          <div class="playlist-coluna-historico">
+            <div class="playlist-secao playlist-secao-historico">
+              <div class="playlist-secao-topo">
+                <h4>Histórico de encerramento</h4>
+              </div>
+              <div id="historicoEncerramento" class="historico-lista"></div>
+            </div>
+
+            <div class="playlist-secao playlist-secao-historico">
+              <div class="playlist-secao-topo">
+                <h4>Histórico de status</h4>
+              </div>
+              <div id="historicoStatus" class="historico-lista"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <div id="modalEditar" class="modal-editar" style="display:none;">
+    <div class="modal-conteudo">
+      <h3>Editar Informações</h3>
+
+      <input type="text" id="editNome" placeholder="Nome do ponto">
+      <input type="text" id="editCidade" placeholder="Cidade">
+      <input type="text" id="editEndereco" placeholder="Endereço">
+
+      <div class="edit-imagem-box">
+        <img id="previewImagem" src="" alt="Preview da imagem">
+        <input type="file" id="inputImagem" accept="image/*">
+      </div>
+
+      <div class="edit-botoes">
+        <button id="btnSalvarEdicao" type="button">Salvar</button>
+        <button id="btnFecharModal" type="button">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="painel.js?v=100"></script>
 </body>
 </html>

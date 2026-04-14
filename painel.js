@@ -626,21 +626,6 @@ if (btnUpgrade && inputUpgrade) {
       return;
     }
 
-    const tipo = detectarTipoArquivo(arquivo);
-    const respostaDataFim = window.prompt("Data de encerramento opcional no formato AAAA-MM-DD", "");
-    let dataFim = null;
-
-    if (respostaDataFim && respostaDataFim.trim()) {
-      const valor = respostaDataFim.trim();
-      if (/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
-        dataFim = `${valor}T23:59:59`;
-      } else {
-        setStatus("Data inválida. Use AAAA-MM-DD", "erro");
-        inputUpgrade.value = "";
-        return;
-      }
-    }
-
     try {
       setStatus("Enviando material...", "normal");
 
@@ -648,11 +633,11 @@ if (btnUpgrade && inputUpgrade) {
       const upload = await uploadArquivoPlaylist(arquivo, codigoSelecionado);
 
       const payload = {
-      codigo: codigoSelecionado,
-      nome: arquivo.name,
-      arquivo_url: upload.url,
-      ordem: ordem,
-      data_fim: null
+        codigo: codigoSelecionado,
+        nome: arquivo.name,
+        arquivo_url: upload.url,
+        ordem: ordem,
+        data_fim: null
       };
 
       const { error } = await supabaseClient
@@ -660,7 +645,7 @@ if (btnUpgrade && inputUpgrade) {
         .insert(payload);
 
       if (error) {
-        console.error(error);
+        console.error("Erro ao salvar material:", error);
         setStatus("Erro ao salvar material", "erro");
         inputUpgrade.value = "";
         return;
@@ -670,7 +655,7 @@ if (btnUpgrade && inputUpgrade) {
       inputUpgrade.value = "";
       await carregarPlaylist();
     } catch (error) {
-      console.error(error);
+      console.error("Erro no upload:", error);
       setStatus("Erro no upload", "erro");
       inputUpgrade.value = "";
     }
@@ -692,10 +677,7 @@ function montarAcoesPlaylist(item) {
 }
 
 function montarNomePlaylist(item) {
-  const nome = escapeHtml(item.nome || "Arquivo");
-  const tipo = escapeHtml(item.tipo || "");
-  const sufixo = tipo ? ` <small>[${tipo}]</small>` : "";
-  return `${nome}${sufixo}`;
+  return escapeHtml(item.nome || "Arquivo");
 }
 
 function montarItemPlaylist(item, index) {

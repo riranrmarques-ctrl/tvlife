@@ -1,1 +1,216 @@
+:root {
+  --bg-main: #f4f7fb;
+  --bg-card: #ffffff;
+  --border: #dbe4f0;
+  --text: #1f2a37;
+  --text-soft: #6b7a90;
 
+  --primary: #2f6fed;
+  --primary-hover: #245bd0;
+
+  --green: #1fa971;
+  --green-bg: #ecfdf5;
+}
+
+body {
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+  color: var(--text);
+}
+
+/* ===== TOPO ===== */
+.topo-fixo.novo-topo {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  border-radius: 18px;
+}
+
+/* título */
+.topo-centro h1 {
+  color: var(--text);
+  font-weight: 800;
+}
+
+.topo-centro p {
+  color: var(--text-soft);
+}
+
+/* status */
+.status-topo {
+  background: var(--green-bg);
+  color: #0f8a5f;
+  border: 1px solid #b7ebd2;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 700;
+}
+
+/* logo */
+.logo-topo-img {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 5px;
+}
+
+/* ===== MENU ===== */
+.menu-topo-btn {
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 700;
+}
+
+.menu-topo-dropdown {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.menu-item {
+  color: var(--text);
+}
+
+.menu-item:hover {
+  background: #f2f7ff;
+  color: var(--primary);
+}
+
+/* ===== CARDS ===== */
+.card-ponto {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+
+.card-nome {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.card-cidade {
+  color: var(--text-soft);
+}
+
+.card-codigo {
+  color: var(--text);
+}
+
+/* imagem */
+.card-imagem-box {
+  background: #f7faff;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+/* status bolinha */
+.status-bolinha {
+  background: var(--green);
+  box-shadow: 0 0 0 4px rgba(31,169,113,0.15);
+}
+
+/* ===== BOTÕES ===== */
+.btn-abrir {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+}
+
+.btn-abrir:hover {
+  background: var(--primary-hover);
+}
+
+.btn-secundario,
+.btn-copiar,
+.btn-copiar-playlist {
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 12px;
+}
+
+/* ===== PLAYLIST ===== */
+.playlist-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+
+/* colunas */
+.playlist-secao {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+/* header tabela */
+.playlist-header-linha {
+  background: #f7faff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+}
+
+/* listas */
+.playlist-lista,
+.historico-lista {
+  background: #fcfdff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+/* ===== DETALHES ===== */
+.playlist-header-textos h2 {
+  color: var(--text);
+}
+
+#cidadePonto,
+#enderecoPonto,
+#codigoAtual {
+  color: var(--text-soft);
+}
+
+/* ===== MODAL ===== */
+.modal-conteudo {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+}
+
+input {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+}
+
+input::placeholder {
+  color: #8a98aa;
+}
+
+/* ===== LOGIN ===== */
+.login-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+}
+
+.login-card h2 {
+  color: var(--text);
+}
+
+/* ===== STATUS ===== */
+.status-destaque {
+  background: var(--green-bg);
+  border: 1px solid #b7ebd2;
+  color: #0f8a5f;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 700;
+}

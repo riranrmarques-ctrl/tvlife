@@ -636,6 +636,7 @@ if (btnUpgrade && inputUpgrade) {
         codigo: codigoSelecionado,
         nome: arquivo.name,
         arquivo_url: upload.url,
+caminho_storage: upload.caminho,
         ordem: ordem,
         data_fim: null
       };

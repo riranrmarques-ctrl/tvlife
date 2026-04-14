@@ -709,7 +709,7 @@ function montarItemPlaylist(item, index) {
           ${formatarDataHora(item.created_at)}
         </div>
         <div class="playlist-item-data playlist-item-encerramento">
-          ${formatarData(item.data_fim)}
+          ${item.data_fim ? formatarData(item.data_fim) : ""}
         </div>
         ${montarAcoesPlaylist(item)}
       </div>

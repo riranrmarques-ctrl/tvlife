@@ -4,8 +4,7 @@ const SUPABASE_KEY = "sb_publishable_EjuRWhlusDG2RLTAHFREQQ_-qZjxm3g";
 const TABELA = "playlists_novo";
 const TABELA_PONTOS = "pontos";
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+let supabaseClient = null;
 let codigoAtual = null;
 let playlistAtual = [];
 let indiceAtual = 0;
@@ -22,6 +21,16 @@ function mostrarMensagem(texto, detalhe = "") {
   `;
 }
 
+function criarSupabaseClient() {
+  if (!window.supabase || !window.supabase.createClient) {
+    mostrarMensagem("Supabase não carregou.", "Verifique a internet ou o CDN do Supabase.");
+    return false;
+  }
+
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  return true;
+}
+
 function limparTimeout() {
   if (timeoutMidia) {
     clearTimeout(timeoutMidia);
@@ -32,7 +41,12 @@ function limparTimeout() {
 function detectarTipo(url) {
   const limpa = String(url || "").toLowerCase().split("?")[0];
 
-  if (limpa.endsWith(".jpg") || limpa.endsWith(".jpeg") || limpa.endsWith(".png") || limpa.endsWith(".webp")) {
+  if (
+    limpa.endsWith(".jpg") ||
+    limpa.endsWith(".jpeg") ||
+    limpa.endsWith(".png") ||
+    limpa.endsWith(".webp")
+  ) {
     return "imagem";
   }
 
@@ -41,6 +55,18 @@ function detectarTipo(url) {
   }
 
   return "video";
+}
+
+function itemEstaAtivo(item) {
+  if (item.ativo === false) return false;
+
+  if (!item.data_fim) return true;
+
+  const fim = new Date(item.data_fim);
+  if (Number.isNaN(fim.getTime())) return true;
+
+  fim.setHours(23, 59, 59, 999);
+  return fim >= new Date();
 }
 
 function extrairUrlDoTexto(texto) {
@@ -65,20 +91,8 @@ function extrairUrlDoTexto(texto) {
   return "";
 }
 
-function itemEstaAtivo(item) {
-  if (item.ativo === false) return false;
-
-  if (!item.data_fim) return true;
-
-  const fim = new Date(item.data_fim);
-  if (Number.isNaN(fim.getTime())) return true;
-
-  fim.setHours(23, 59, 59, 999);
-  return fim >= new Date();
-}
-
 async function registrarPing() {
-  if (!codigoAtual) return;
+  if (!codigoAtual || !supabaseClient) return;
 
   const { error } = await supabaseClient
     .from(TABELA_PONTOS)
@@ -103,7 +117,7 @@ async function buscarPlaylist() {
 
   if (error) {
     console.error("Erro Supabase:", error);
-    mostrarMensagem("Erro ao buscar playlist.", error.message || "Verifique permissões e tabela playlists_novo.");
+    mostrarMensagem("Erro ao buscar playlist.", error.message || "Verifique a tabela playlists_novo.");
     return false;
   }
 
@@ -184,15 +198,13 @@ function tocarImagem(item) {
 
   const img = document.querySelector("img");
 
-  img.onload = () => {
-    console.log("Imagem carregada:", item.url);
-  };
-
-  img.onerror = () => {
-    console.error("Erro ao carregar imagem:", item.url);
-    mostrarMensagem("Erro ao carregar imagem.", item.nome);
-    timeoutMidia = setTimeout(proximo, 3000);
-  };
+  if (img) {
+    img.onerror = () => {
+      console.error("Erro ao carregar imagem:", item.url);
+      mostrarMensagem("Erro ao carregar imagem.", item.nome);
+      timeoutMidia = setTimeout(proximo, 3000);
+    };
+  }
 
   timeoutMidia = setTimeout(proximo, 20000);
 }
@@ -205,6 +217,11 @@ function tocarVideo(item) {
   `;
 
   const video = document.getElementById("videoPlayer");
+
+  if (!video) {
+    mostrarMensagem("Erro ao iniciar vídeo.");
+    return;
+  }
 
   video.src = item.url;
   video.muted = true;
@@ -233,7 +250,6 @@ function tocarVideo(item) {
 
   timeoutMidia = setTimeout(() => {
     if (video.readyState === 0) {
-      console.warn("Vídeo não carregou em 15 segundos:", item.url);
       mostrarMensagem("Vídeo demorou para carregar.", "Pulando para o próximo item...");
       setTimeout(proximo, 2000);
     }
@@ -269,8 +285,6 @@ function tocarMidia() {
     return;
   }
 
-  console.log("Reproduzindo:", item);
-
   if (item.tipo === "imagem") {
     tocarImagem(item);
     return;
@@ -281,4 +295,38 @@ function tocarMidia() {
     return;
   }
 
-  tocar
+  tocarVideo(item);
+}
+
+async function iniciar() {
+  try {
+    mostrarMensagem("Iniciando player...");
+
+    if (!criarSupabaseClient()) {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    codigoAtual = params.get("codigo");
+
+    if (!codigoAtual) {
+      mostrarMensagem("Código não informado.", "Exemplo: player.html?codigo=H4E9L2A");
+      return;
+    }
+
+    codigoAtual = String(codigoAtual).trim().toUpperCase();
+
+    await registrarPing();
+
+    const encontrou = await buscarPlaylist();
+
+    if (encontrou) {
+      tocarMidia();
+    }
+  } catch (error) {
+    console.error("Erro geral no player:", error);
+    mostrarMensagem("Erro geral no player.", error.message || "Veja o console do navegador.");
+  }
+}
+
+window.addEventListener("load", iniciar);

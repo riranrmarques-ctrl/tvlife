@@ -3,7 +3,6 @@ const SUPABASE_KEY = "sb_publishable_EjuRWhlusDG2RLTAHFREQQ_-qZjxm3g";
 const BUCKET = "pontos";
 const TABELA = "playlists_novo";
 const TABELA_PONTOS = "pontos";
-const TABELA_HISTORICO_CONEXAO = "historico_conexao";
 
 const SENHA_PAINEL = "videolife";
 
@@ -14,20 +13,16 @@ const conteudoPainel = document.getElementById("conteudoPainel");
 const senhaInput = document.getElementById("senhaInput");
 const btnLogin = document.getElementById("btnLogin");
 const loginErro = document.getElementById("loginErro");
-
 const statusEl = document.querySelector(".status-topo");
 const listaPontos = document.getElementById("listaPontos");
 const pontoDetalhe = document.getElementById("pontoDetalhe");
-
 const codigoAtual = document.getElementById("codigoAtual");
 const tituloPasta = document.getElementById("tituloPasta");
-
 const btnVoltar = document.getElementById("btnVoltar");
 const btnCopiarCodigo = document.getElementById("btnCopiarCodigo");
 const btnEditarInfo = document.getElementById("btnEditarInfo");
 const btnUpgrade = document.getElementById("btnUpgrade");
 const inputUpgrade = document.getElementById("inputUpgrade");
-
 const modalEditar = document.getElementById("modalEditar");
 const editNome = document.getElementById("editNome");
 const editCidade = document.getElementById("editCidade");
@@ -41,17 +36,23 @@ let codigoSelecionado = null;
 let pontosMap = {};
 let dragIndex = null;
 let arquivoImagemEdicao = null;
-let statusAnteriorMap = {};
 let posicaoImagemAtual = { x: 50, y: 50 };
 let arrastandoPreview = false;
-let playlistSchema = null;
+
+const playlistSchema = {
+  campoCodigo: "codigo",
+  campoNome: "nome",
+  campoDataFim: "data_fim",
+  campoDataCriacao: "created_at",
+  temOrdem: true,
+  temCaminhoStorage: true,
+  temAtivo: true
+};
 
 function setStatus(texto, tipo = "normal") {
   if (!statusEl) return;
-
   statusEl.textContent = texto;
   statusEl.classList.remove("ok", "erro");
-
   if (tipo === "ok") statusEl.classList.add("ok");
   if (tipo === "erro") statusEl.classList.add("erro");
 }
@@ -74,73 +75,29 @@ function obterCidadeComNomeEmNegrito(cidade) {
 
 function calcularStatusInfo(ponto) {
   if (!ponto?.ultimo_ping) {
-    return {
-      texto: "Inativo",
-      detalhe: "sem histórico",
-      ativo: false,
-      classe: "inativo"
-    };
+    return { texto: "Inativo", ativo: false, classe: "inativo" };
   }
 
   const dataPing = new Date(ponto.ultimo_ping);
-
   if (Number.isNaN(dataPing.getTime())) {
-    return {
-      texto: "Inativo",
-      detalhe: "sem histórico",
-      ativo: false,
-      classe: "inativo"
-    };
+    return { texto: "Inativo", ativo: false, classe: "inativo" };
   }
 
   const diff = Date.now() - dataPing.getTime();
-  const horario = dataPing.toLocaleString("pt-BR");
 
   if (diff < 5 * 60 * 1000) {
-    return {
-      texto: "Ativo",
-      detalhe: horario,
-      ativo: true,
-      classe: "ativo"
-    };
+    return { texto: "Ativo", ativo: true, classe: "ativo" };
   }
 
-  return {
-    texto: "Inativo",
-    detalhe: horario,
-    ativo: false,
-    classe: "inativo"
-  };
-}
-
-function formatarData(valor) {
-  if (!valor) return "Sem data";
-
-  const data = new Date(valor);
-  if (Number.isNaN(data.getTime())) return "Sem data";
-
-  return data.toLocaleDateString("pt-BR");
-}
-
-function formatarDataHora(valor) {
-  if (!valor) return "Sem data";
-
-  const data = new Date(valor);
-  if (Number.isNaN(data.getTime())) return "Sem data";
-
-  return data.toLocaleString("pt-BR");
-}
-
-function obterDataFimItem(item) {
-  return item?.data_fim || item?.data_encerramento || null;
+  return { texto: "Inativo", ativo: false, classe: "inativo" };
 }
 
 function obterNomeItem(item) {
   return item?.nome || item?.nome_arquivo || "Arquivo";
 }
 
-function obterDataCriacaoItem(item) {
-  return item?.created_at || item?.criado_em || item?.data_postagem || null;
+function obterDataFimItem(item) {
+  return item?.data_fim || item?.data_encerramento || null;
 }
 
 function itemEstaInativo(item) {
@@ -155,27 +112,6 @@ function itemEstaInativo(item) {
 
   fim.setHours(23, 59, 59, 999);
   return fim < hoje;
-}
-
-async function registrarEventoConexao(codigo, statusAtual) {
-  const evento = statusAtual === "ativo" ? "conectou" : "desconectou";
-
-  const { error } = await supabaseClient
-    .from(TABELA_HISTORICO_CONEXAO)
-    .insert({
-      codigo,
-      evento
-    });
-
-  if (error) {
-    console.error("Erro ao registrar histórico de conexão:", error);
-  }
-}
-
-function obterTextoEventoConexao(evento) {
-  if (evento === "conectou") return "Conectou";
-  if (evento === "desconectou") return "Desconectou";
-  return evento || "Sem evento";
 }
 
 function obterChavePosicaoImagem(codigo) {
@@ -224,7 +160,7 @@ function detectarTipoArquivo(file) {
   const mime = String(file?.type || "").toLowerCase();
 
   if (mime.startsWith("video/") || nome.endsWith(".mp4")) return "video";
-  if (mime === "image/jpeg" || nome.endsWith(".jpg") || nome.endsWith(".jpeg")) return "imagem";
+  if (mime.startsWith("image/") || nome.endsWith(".jpg") || nome.endsWith(".jpeg") || nome.endsWith(".png") || nome.endsWith(".webp")) return "imagem";
   if (mime.startsWith("text/") || nome.endsWith(".txt")) return "texto";
 
   return null;
@@ -238,16 +174,14 @@ async function uploadImagemPonto(file, codigo) {
   const extensao = (file.name.split(".").pop() || "jpg").toLowerCase();
   const nomeArquivo = `${codigo}/${Date.now()}.${extensao}`;
 
-  const { error: uploadError } = await supabaseClient.storage
+  const { error } = await supabaseClient.storage
     .from(BUCKET)
     .upload(nomeArquivo, file, {
       cacheControl: "3600",
       upsert: true
     });
 
-  if (uploadError) {
-    throw uploadError;
-  }
+  if (error) throw error;
 
   const { data } = supabaseClient.storage.from(BUCKET).getPublicUrl(nomeArquivo);
   return data.publicUrl;
@@ -257,16 +191,14 @@ async function uploadArquivoPlaylist(file, codigo) {
   const nomeSeguro = normalizarNomeArquivo(file.name);
   const caminho = `${codigo}/${Date.now()}_${nomeSeguro}`;
 
-  const { error: uploadError } = await supabaseClient.storage
+  const { error } = await supabaseClient.storage
     .from(BUCKET)
     .upload(caminho, file, {
       cacheControl: "3600",
       upsert: false
     });
 
-  if (uploadError) {
-    throw uploadError;
-  }
+  if (error) throw error;
 
   const { data } = supabaseClient.storage.from(BUCKET).getPublicUrl(caminho);
 
@@ -276,39 +208,15 @@ async function uploadArquivoPlaylist(file, codigo) {
   };
 }
 
-async function detectarSchemaPlaylist() {
-  if (playlistSchema) return playlistSchema;
-
-  playlistSchema = {
-    tipo: "novo",
-    campoCodigo: "codigo",
-    campoNome: "nome",
-    campoDataFim: "data_fim",
-    campoDataCriacao: "created_at",
-    temOrdem: true,
-    temCaminhoStorage: true,
-    temAtivo: true
-  };
-
-  return playlistSchema;
-}
-
 async function obterProximaOrdemPlaylist(codigo) {
-  const schema = await detectarSchemaPlaylist();
-
-  if (!schema.temOrdem) return 0;
-
   const { data, error } = await supabaseClient
     .from(TABELA)
     .select("ordem")
-    .eq(schema.campoCodigo, codigo)
+    .eq("codigo", codigo)
     .order("ordem", { ascending: false })
     .limit(1);
 
-  if (error) {
-    throw error;
-  }
-
+  if (error) throw error;
   if (!data || !data.length) return 0;
 
   const ultima = Number(data[0].ordem);
@@ -331,23 +239,6 @@ function validarLogin() {
   iniciarPainel();
 }
 
-if (sessionStorage.getItem("painelLiberado") === "1") {
-  if (loginBox) loginBox.style.display = "none";
-  if (conteudoPainel) conteudoPainel.style.display = "block";
-  setStatus("Painel Ativo", "ok");
-  iniciarPainel();
-}
-
-if (btnLogin) {
-  btnLogin.onclick = validarLogin;
-}
-
-if (senhaInput) {
-  senhaInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") validarLogin();
-  });
-}
-
 async function buscarPontos() {
   const { data, error } = await supabaseClient
     .from(TABELA_PONTOS)
@@ -366,13 +257,14 @@ async function buscarPontos() {
 function renderizarCardsPontos(lista) {
   pontosMap = {};
 
-  lista.forEach(p => {
-    pontosMap[p.codigo] = p;
+  lista.forEach(ponto => {
+    pontosMap[ponto.codigo] = ponto;
   });
 
   document.querySelectorAll(".card-ponto").forEach(card => {
     const codigo = String(card.dataset.codigo || "").trim();
     const ponto = pontosMap[codigo] || {};
+    const statusInfo = calcularStatusInfo(ponto);
 
     const nomeEl = card.querySelector(".card-nome");
     const cidadeEl = card.querySelector(".card-cidade");
@@ -380,23 +272,8 @@ function renderizarCardsPontos(lista) {
     const bolinhaEl = card.querySelector(".status-bolinha");
     const imagemEl = card.querySelector(".card-imagem");
 
-    const statusInfo = calcularStatusInfo(ponto);
-    const statusAtual = statusInfo.ativo ? "ativo" : "inativo";
-    const statusAnterior = statusAnteriorMap[codigo];
-
-    if (statusAnterior && statusAnterior !== statusAtual) {
-      registrarEventoConexao(codigo, statusAtual);
-    }
-
-    statusAnteriorMap[codigo] = statusAtual;
-
-    if (nomeEl) {
-      nomeEl.innerHTML = `<strong>${escapeHtml(ponto.nome || codigo)}</strong>`;
-    }
-
-    if (cidadeEl) {
-      cidadeEl.innerHTML = obterCidadeComNomeEmNegrito(ponto.cidade);
-    }
+    if (nomeEl) nomeEl.innerHTML = `<strong>${escapeHtml(ponto.nome || codigo)}</strong>`;
+    if (cidadeEl) cidadeEl.innerHTML = obterCidadeComNomeEmNegrito(ponto.cidade);
 
     if (statusElCard) {
       statusElCard.textContent = statusInfo.texto;
@@ -420,45 +297,31 @@ function renderizarCardsPontos(lista) {
 function abrirPonto(codigo) {
   codigoSelecionado = String(codigo || "").trim();
   const ponto = pontosMap[codigoSelecionado] || {};
+  const statusInfo = calcularStatusInfo(ponto);
 
   if (listaPontos) listaPontos.style.display = "none";
   if (pontoDetalhe) pontoDetalhe.style.display = "block";
-
-  if (codigoAtual) {
-    codigoAtual.textContent = codigoSelecionado;
-  }
-
-  if (tituloPasta) {
-    tituloPasta.innerHTML = `<strong>${escapeHtml(ponto.nome || codigoSelecionado)}</strong>`;
-  }
+  if (codigoAtual) codigoAtual.textContent = codigoSelecionado;
+  if (tituloPasta) tituloPasta.innerHTML = `<strong>${escapeHtml(ponto.nome || codigoSelecionado)}</strong>`;
 
   const cidadePonto = document.getElementById("cidadePonto");
   const enderecoPonto = document.getElementById("enderecoPonto");
   const statusPonto = document.getElementById("statusPonto");
   const imagemPonto = document.getElementById("imagemPonto");
 
-  const statusInfo = calcularStatusInfo(ponto);
-  const posicaoSalva = lerPosicaoImagem(codigoSelecionado);
-
-  if (cidadePonto) {
-    cidadePonto.innerHTML = obterCidadeComNomeEmNegrito(ponto.cidade);
-  }
-
-  if (enderecoPonto) {
-    enderecoPonto.textContent = ponto.endereco || "Endereço não definido";
-  }
+  if (cidadePonto) cidadePonto.innerHTML = obterCidadeComNomeEmNegrito(ponto.cidade);
+  if (enderecoPonto) enderecoPonto.textContent = ponto.endereco || "Endereço não definido";
 
   if (statusPonto) {
     statusPonto.textContent = statusInfo.texto;
     statusPonto.classList.remove("ativo", "inativo");
     statusPonto.classList.add(statusInfo.classe);
-    statusPonto.dataset.status = statusInfo.texto.toLowerCase();
   }
 
   if (imagemPonto) {
     imagemPonto.src = obterImagemPonto(ponto);
     imagemPonto.alt = ponto.nome || codigoSelecionado;
-    aplicarPosicaoImagem(imagemPonto, posicaoSalva);
+    aplicarPosicaoImagem(imagemPonto, lerPosicaoImagem(codigoSelecionado));
   }
 
   carregarPlaylist();
@@ -495,246 +358,8 @@ function fecharModalEdicao() {
   if (inputImagem) inputImagem.value = "";
 }
 
-if (btnVoltar) {
-  btnVoltar.onclick = () => {
-    if (listaPontos) listaPontos.style.display = "grid";
-    if (pontoDetalhe) pontoDetalhe.style.display = "none";
-  };
-}
-
-if (btnCopiarCodigo) {
-  btnCopiarCodigo.onclick = async () => {
-    if (!codigoSelecionado) return;
-
-    try {
-      await navigator.clipboard.writeText(codigoSelecionado);
-      setStatus("Código copiado", "ok");
-    } catch {
-      setStatus("Erro ao copiar código", "erro");
-    }
-  };
-}
-
-if (btnEditarInfo) {
-  btnEditarInfo.onclick = () => {
-    abrirModalEdicao();
-  };
-}
-
-if (btnFecharModal) {
-  btnFecharModal.onclick = () => {
-    fecharModalEdicao();
-  };
-}
-
-if (modalEditar) {
-  modalEditar.addEventListener("click", e => {
-    if (e.target === modalEditar) {
-      fecharModalEdicao();
-    }
-  });
-}
-
-if (inputImagem) {
-  inputImagem.addEventListener("change", e => {
-    const arquivo = e.target.files && e.target.files[0] ? e.target.files[0] : null;
-    if (!arquivo) return;
-
-    arquivoImagemEdicao = arquivo;
-    posicaoImagemAtual = { x: 50, y: 50 };
-
-    const reader = new FileReader();
-
-    reader.onload = evento => {
-      if (previewImagem) {
-        previewImagem.src = evento.target.result;
-        aplicarPosicaoImagem(previewImagem, posicaoImagemAtual);
-      }
-    };
-
-    reader.readAsDataURL(arquivo);
-  });
-}
-
-if (previewImagem) {
-  previewImagem.style.cursor = "grab";
-
-  previewImagem.addEventListener("mousedown", e => {
-    e.preventDefault();
-    arrastandoPreview = true;
-    previewImagem.style.cursor = "grabbing";
-  });
-
-  window.addEventListener("mouseup", () => {
-    arrastandoPreview = false;
-
-    if (previewImagem) {
-      previewImagem.style.cursor = "grab";
-    }
-  });
-
-  previewImagem.addEventListener("mousemove", e => {
-    if (!arrastandoPreview) return;
-
-    const rect = previewImagem.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
-
-    let x = ((e.clientX - rect.left) / rect.width) * 100;
-    let y = ((e.clientY - rect.top) / rect.height) * 100;
-
-    x = Math.max(0, Math.min(100, x));
-    y = Math.max(0, Math.min(100, y));
-
-    posicaoImagemAtual = { x, y };
-    aplicarPosicaoImagem(previewImagem, posicaoImagemAtual);
-  });
-
-  previewImagem.addEventListener("dragstart", e => {
-    e.preventDefault();
-  });
-}
-
-if (btnSalvarEdicao) {
-  btnSalvarEdicao.onclick = async () => {
-    if (!codigoSelecionado) return;
-
-    const ponto = pontosMap[codigoSelecionado] || {};
-    const nome = editNome ? editNome.value.trim() : "";
-    const cidade = editCidade ? editCidade.value.trim() : "";
-    const endereco = editEndereco ? editEndereco.value.trim() : "";
-
-    try {
-      setStatus("Salvando informações...", "normal");
-
-      const { error: erroInfo } = await supabaseClient
-        .from(TABELA_PONTOS)
-        .update({
-          nome,
-          cidade,
-          endereco
-        })
-        .eq("codigo", codigoSelecionado);
-
-      if (erroInfo) {
-        console.error("Erro ao salvar textos:", erroInfo);
-        setStatus("Erro ao atualizar informações", "erro");
-        return;
-      }
-
-      ponto.nome = nome;
-      ponto.cidade = cidade;
-      ponto.endereco = endereco;
-
-      if (arquivoImagemEdicao) {
-        setStatus("Enviando imagem...", "normal");
-
-        const imagemUrlFinal = await uploadImagemPonto(arquivoImagemEdicao, codigoSelecionado);
-
-        const { error: erroImagem } = await supabaseClient
-          .from(TABELA_PONTOS)
-          .update({
-            imagem_url: imagemUrlFinal
-          })
-          .eq("codigo", codigoSelecionado);
-
-        if (erroImagem) {
-          console.error("Erro ao salvar imagem:", erroImagem);
-          setStatus("Erro ao salvar imagem", "erro");
-          return;
-        }
-
-        ponto.imagem_url = imagemUrlFinal;
-      }
-
-      pontosMap[codigoSelecionado] = ponto;
-      salvarPosicaoImagem(codigoSelecionado, posicaoImagemAtual);
-
-      fecharModalEdicao();
-      abrirPonto(codigoSelecionado);
-      renderizarCardsPontos(Object.values(pontosMap));
-      setStatus("Atualizado com sucesso", "ok");
-    } catch (error) {
-      console.error("Erro geral ao salvar edição:", error);
-      setStatus("Erro ao salvar edição", "erro");
-    }
-  };
-}
-
-if (btnUpgrade && inputUpgrade) {
-  btnUpgrade.onclick = () => {
-    if (!codigoSelecionado) {
-      setStatus("Abra um ponto primeiro", "erro");
-      return;
-    }
-
-    inputUpgrade.value = "";
-    inputUpgrade.click();
-  };
-
-  inputUpgrade.addEventListener("change", async e => {
-    const arquivo = e.target.files && e.target.files[0] ? e.target.files[0] : null;
-    if (!arquivo || !codigoSelecionado) return;
-
-    if (!arquivoPermitido(arquivo)) {
-      setStatus("Use mp4, jpg, jpeg ou txt", "erro");
-      inputUpgrade.value = "";
-      return;
-    }
-
-    try {
-      setStatus("Enviando material...", "normal");
-
-      const schema = await detectarSchemaPlaylist();
-      const ordem = await obterProximaOrdemPlaylist(codigoSelecionado);
-      const upload = await uploadArquivoPlaylist(arquivo, codigoSelecionado);
-
-      const payload = {
-        [schema.campoCodigo]: codigoSelecionado,
-        [schema.campoNome]: arquivo.name,
-        arquivo_url: upload.url
-      };
-
-      if (schema.temCaminhoStorage) {
-        payload.caminho_storage = upload.caminho;
-      }
-
-      if (schema.temOrdem) {
-        payload.ordem = ordem;
-      }
-
-      if (schema.campoDataFim) {
-        payload[schema.campoDataFim] = null;
-      }
-
-      if (schema.temAtivo) {
-        payload.ativo = true;
-      }
-
-      const { error } = await supabaseClient
-        .from(TABELA)
-        .insert(payload);
-
-      if (error) {
-        console.error("Erro ao salvar material:", error);
-        setStatus("Erro ao salvar material", "erro");
-        inputUpgrade.value = "";
-        return;
-      }
-
-      setStatus("Material enviado com sucesso", "ok");
-      inputUpgrade.value = "";
-      await carregarPlaylist();
-    } catch (error) {
-      console.error("Erro no upload:", error);
-      setStatus("Erro no upload", "erro");
-      inputUpgrade.value = "";
-    }
-  });
-}
-
 function montarAcoesPlaylist(item) {
   const url = item.arquivo_url ? String(item.arquivo_url) : "";
-
   const abrir = url
     ? `<a class="playlist-acao" href="${url}" target="_blank" rel="noopener noreferrer" title="Abrir">↗</a>`
     : "";
@@ -752,114 +377,36 @@ function montarNomePlaylist(item) {
 }
 
 function montarItemPlaylist(item, index) {
-  const podeOrdenar = Boolean(playlistSchema?.temOrdem);
-  const dataCriacao = obterDataCriacaoItem(item);
-  const dataFim = obterDataFimItem(item);
-
   return `
-    <div class="playlist-item" draggable="${podeOrdenar ? "true" : "false"}" data-index="${index}" data-id="${item.id}">
+    <div class="playlist-item" draggable="true" data-index="${index}" data-id="${item.id}">
       <div class="playlist-item-linha">
-        <div class="playlist-item-handle" title="Arrastar">${podeOrdenar ? "⋮⋮" : ""}</div>
+        <div class="playlist-item-handle" title="Arrastar">⋮⋮</div>
         <div class="playlist-item-ordem">${index + 1}.</div>
         <div class="playlist-item-nome" title="${escapeHtml(obterNomeItem(item))}">${montarNomePlaylist(item)}</div>
-        <div class="playlist-item-data playlist-item-postado">
-          ${formatarDataHora(dataCriacao)}
-        </div>
-        <div class="playlist-item-data playlist-item-encerramento">
-          ${dataFim ? formatarData(dataFim) : ""}
-        </div>
         ${montarAcoesPlaylist(item)}
       </div>
     </div>
   `;
 }
 
-function montarItemHistoricoEncerramento(item, index) {
-  return `
-    <div class="historico-item">
-      <span class="historico-item-ordem">${index + 1}.</span>
-      <span class="historico-item-nome">${escapeHtml(obterNomeItem(item))}</span>
-      <span class="historico-item-valor">${formatarData(obterDataFimItem(item))}</span>
-    </div>
-  `;
-}
-
-function montarItemHistoricoStatus(item, index) {
-  const textoEvento = obterTextoEventoConexao(item.evento);
-  const classe = item.evento === "conectou" ? "ativo" : item.evento === "desconectou" ? "inativo" : "";
-
-  return `
-    <div class="historico-item">
-      <span class="historico-item-ordem">${index + 1}.</span>
-      <span class="historico-item-nome historico-status ${classe}">${textoEvento}</span>
-      <span class="historico-item-valor">${formatarDataHora(item.data_hora || item.created_at)}</span>
-    </div>
-  `;
-}
-
-function obterContainerHistoricoEncerramento() {
-  return (
-    document.getElementById("historicoEncerramento") ||
-    document.getElementById("playlistInativaEncerramento") ||
-    document.getElementById("playlistInativa")
-  );
-}
-
-function obterContainerHistoricoStatus() {
-  return (
-    document.getElementById("historicoStatus") ||
-    document.getElementById("playlistInativaStatus")
-  );
-}
-
 async function carregarPlaylist() {
   if (!codigoSelecionado) return;
 
-  const schema = await detectarSchemaPlaylist();
-
-  let queryPlaylist = supabaseClient
+  const { data, error } = await supabaseClient
     .from(TABELA)
     .select("*")
-    .eq(schema.campoCodigo, codigoSelecionado);
+    .eq("codigo", codigoSelecionado)
+    .order("ordem", { ascending: true });
 
-  if (schema.temOrdem) {
-    queryPlaylist = queryPlaylist.order("ordem", { ascending: true });
-  } else if (schema.campoDataCriacao) {
-    queryPlaylist = queryPlaylist.order(schema.campoDataCriacao, { ascending: true });
-  }
-
-  const [
-    { data: playlistData, error: playlistError },
-    { data: historicoData, error: historicoError }
-  ] = await Promise.all([
-    queryPlaylist,
-    supabaseClient
-      .from(TABELA_HISTORICO_CONEXAO)
-      .select("*")
-      .eq("codigo", codigoSelecionado)
-      .order("data_hora", { ascending: false })
-  ]);
-
-  if (playlistError) {
-    console.error(playlistError);
+  if (error) {
+    console.error(error);
     setStatus("Erro ao carregar playlist", "erro");
     return;
   }
 
-  if (historicoError) {
-    console.error(historicoError);
-    setStatus("Erro ao carregar histórico", "erro");
-    return;
-  }
-
-  const lista = playlistData || [];
-  const historicoConexao = historicoData || [];
+  const lista = data || [];
   const ativos = lista.filter(item => !itemEstaInativo(item));
-  const inativos = lista.filter(item => itemEstaInativo(item));
-
   const playlistAtiva = document.getElementById("playlistAtiva");
-  const historicoEncerramento = obterContainerHistoricoEncerramento();
-  const historicoStatus = obterContainerHistoricoStatus();
 
   if (playlistAtiva) {
     playlistAtiva.innerHTML = ativos.length
@@ -867,22 +414,7 @@ async function carregarPlaylist() {
       : `<div class="playlist-vazia">Nenhum item ativo</div>`;
   }
 
-  if (historicoEncerramento) {
-    historicoEncerramento.innerHTML = inativos.length
-      ? inativos.map((item, index) => montarItemHistoricoEncerramento(item, index)).join("")
-      : `<div class="playlist-vazia">Sem histórico</div>`;
-  }
-
-  if (historicoStatus) {
-    historicoStatus.innerHTML = historicoConexao.length
-      ? historicoConexao.map((item, index) => montarItemHistoricoStatus(item, index)).join("")
-      : `<div class="playlist-vazia">Sem histórico</div>`;
-  }
-
-  if (schema.temOrdem) {
-    ativarDrag(ativos);
-  }
-
+  ativarDrag(ativos);
   ativarExclusaoItens();
 }
 
@@ -897,18 +429,14 @@ function ativarExclusaoItens() {
       const confirmar = window.confirm("Deseja excluir este item da playlist?");
       if (!confirmar) return;
 
-      const schema = await detectarSchemaPlaylist();
+      const { data: itemData } = await supabaseClient
+        .from(TABELA)
+        .select("caminho_storage")
+        .eq("id", id)
+        .single();
 
-      if (schema.temCaminhoStorage) {
-        const { data: itemData } = await supabaseClient
-          .from(TABELA)
-          .select("caminho_storage")
-          .eq("id", id)
-          .single();
-
-        if (itemData?.caminho_storage) {
-          await supabaseClient.storage.from(BUCKET).remove([itemData.caminho_storage]);
-        }
+      if (itemData?.caminho_storage) {
+        await supabaseClient.storage.from(BUCKET).remove([itemData.caminho_storage]);
       }
 
       const { error } = await supabaseClient
@@ -953,11 +481,8 @@ function ativarDrag(lista) {
 
     item.addEventListener("dragover", e => {
       e.preventDefault();
-
-      if (!item.classList.contains("drag-over")) {
-        limparEstadosDrag();
-        item.classList.add("drag-over");
-      }
+      limparEstadosDrag();
+      item.classList.add("drag-over");
     });
 
     item.addEventListener("dragleave", () => {
@@ -967,13 +492,6 @@ function ativarDrag(lista) {
     item.addEventListener("drop", async () => {
       item.classList.remove("drag-over");
       item.classList.add("drop-animating");
-
-      const schema = await detectarSchemaPlaylist();
-
-      if (!schema.temOrdem) {
-        item.classList.remove("drop-animating");
-        return;
-      }
 
       const target = Number(item.dataset.index);
 
@@ -1009,9 +527,233 @@ function ativarDrag(lista) {
   });
 }
 
-async function iniciarPainel() {
-  await detectarSchemaPlaylist();
+if (btnLogin) {
+  btnLogin.onclick = validarLogin;
+}
 
+if (senhaInput) {
+  senhaInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") validarLogin();
+  });
+}
+
+if (sessionStorage.getItem("painelLiberado") === "1") {
+  if (loginBox) loginBox.style.display = "none";
+  if (conteudoPainel) conteudoPainel.style.display = "block";
+  setStatus("Painel Ativo", "ok");
+  iniciarPainel();
+}
+
+if (btnVoltar) {
+  btnVoltar.onclick = () => {
+    if (listaPontos) listaPontos.style.display = "grid";
+    if (pontoDetalhe) pontoDetalhe.style.display = "none";
+  };
+}
+
+if (btnCopiarCodigo) {
+  btnCopiarCodigo.onclick = async () => {
+    if (!codigoSelecionado) return;
+
+    try {
+      await navigator.clipboard.writeText(codigoSelecionado);
+      setStatus("Código copiado", "ok");
+    } catch {
+      setStatus("Erro ao copiar código", "erro");
+    }
+  };
+}
+
+if (btnEditarInfo) {
+  btnEditarInfo.onclick = abrirModalEdicao;
+}
+
+if (btnFecharModal) {
+  btnFecharModal.onclick = fecharModalEdicao;
+}
+
+if (modalEditar) {
+  modalEditar.addEventListener("click", e => {
+    if (e.target === modalEditar) fecharModalEdicao();
+  });
+}
+
+if (inputImagem) {
+  inputImagem.addEventListener("change", e => {
+    const arquivo = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+    if (!arquivo) return;
+
+    arquivoImagemEdicao = arquivo;
+    posicaoImagemAtual = { x: 50, y: 50 };
+
+    const reader = new FileReader();
+
+    reader.onload = evento => {
+      if (previewImagem) {
+        previewImagem.src = evento.target.result;
+        aplicarPosicaoImagem(previewImagem, posicaoImagemAtual);
+      }
+    };
+
+    reader.readAsDataURL(arquivo);
+  });
+}
+
+if (previewImagem) {
+  previewImagem.style.cursor = "grab";
+
+  previewImagem.addEventListener("mousedown", e => {
+    e.preventDefault();
+    arrastandoPreview = true;
+    previewImagem.style.cursor = "grabbing";
+  });
+
+  window.addEventListener("mouseup", () => {
+    arrastandoPreview = false;
+    if (previewImagem) previewImagem.style.cursor = "grab";
+  });
+
+  previewImagem.addEventListener("mousemove", e => {
+    if (!arrastandoPreview) return;
+
+    const rect = previewImagem.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    let x = ((e.clientX - rect.left) / rect.width) * 100;
+    let y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    x = Math.max(0, Math.min(100, x));
+    y = Math.max(0, Math.min(100, y));
+
+    posicaoImagemAtual = { x, y };
+    aplicarPosicaoImagem(previewImagem, posicaoImagemAtual);
+  });
+
+  previewImagem.addEventListener("dragstart", e => {
+    e.preventDefault();
+  });
+}
+
+if (btnSalvarEdicao) {
+  btnSalvarEdicao.onclick = async () => {
+    if (!codigoSelecionado) return;
+
+    const ponto = pontosMap[codigoSelecionado] || {};
+    const nome = editNome ? editNome.value.trim() : "";
+    const cidade = editCidade ? editCidade.value.trim() : "";
+    const endereco = editEndereco ? editEndereco.value.trim() : "";
+
+    try {
+      setStatus("Salvando informações...", "normal");
+
+      const { error: erroInfo } = await supabaseClient
+        .from(TABELA_PONTOS)
+        .update({ nome, cidade, endereco })
+        .eq("codigo", codigoSelecionado);
+
+      if (erroInfo) {
+        console.error(erroInfo);
+        setStatus("Erro ao atualizar informações", "erro");
+        return;
+      }
+
+      ponto.nome = nome;
+      ponto.cidade = cidade;
+      ponto.endereco = endereco;
+
+      if (arquivoImagemEdicao) {
+        setStatus("Enviando imagem...", "normal");
+
+        const imagemUrlFinal = await uploadImagemPonto(arquivoImagemEdicao, codigoSelecionado);
+
+        const { error: erroImagem } = await supabaseClient
+          .from(TABELA_PONTOS)
+          .update({ imagem_url: imagemUrlFinal })
+          .eq("codigo", codigoSelecionado);
+
+        if (erroImagem) {
+          console.error(erroImagem);
+          setStatus("Erro ao salvar imagem", "erro");
+          return;
+        }
+
+        ponto.imagem_url = imagemUrlFinal;
+      }
+
+      pontosMap[codigoSelecionado] = ponto;
+      salvarPosicaoImagem(codigoSelecionado, posicaoImagemAtual);
+
+      fecharModalEdicao();
+      abrirPonto(codigoSelecionado);
+      renderizarCardsPontos(Object.values(pontosMap));
+      setStatus("Atualizado com sucesso", "ok");
+    } catch (error) {
+      console.error(error);
+      setStatus("Erro ao salvar edição", "erro");
+    }
+  };
+}
+
+if (btnUpgrade && inputUpgrade) {
+  btnUpgrade.onclick = () => {
+    if (!codigoSelecionado) {
+      setStatus("Abra um ponto primeiro", "erro");
+      return;
+    }
+
+    inputUpgrade.value = "";
+    inputUpgrade.click();
+  };
+
+  inputUpgrade.addEventListener("change", async e => {
+    const arquivo = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+    if (!arquivo || !codigoSelecionado) return;
+
+    if (!arquivoPermitido(arquivo)) {
+      setStatus("Use mp4, jpg, jpeg, png, webp ou txt", "erro");
+      inputUpgrade.value = "";
+      return;
+    }
+
+    try {
+      setStatus("Enviando material...", "normal");
+
+      const ordem = await obterProximaOrdemPlaylist(codigoSelecionado);
+      const upload = await uploadArquivoPlaylist(arquivo, codigoSelecionado);
+
+      const payload = {
+        codigo: codigoSelecionado,
+        nome: arquivo.name,
+        arquivo_url: upload.url,
+        caminho_storage: upload.caminho,
+        ordem,
+        ativo: true,
+        data_fim: null
+      };
+
+      const { error } = await supabaseClient
+        .from(TABELA)
+        .insert(payload);
+
+      if (error) {
+        console.error(error);
+        setStatus("Erro ao salvar material", "erro");
+        inputUpgrade.value = "";
+        return;
+      }
+
+      setStatus("Material enviado com sucesso", "ok");
+      inputUpgrade.value = "";
+      await carregarPlaylist();
+    } catch (error) {
+      console.error(error);
+      setStatus("Erro no upload", "erro");
+      inputUpgrade.value = "";
+    }
+  });
+}
+
+async function iniciarPainel() {
   const pontos = await buscarPontos();
   renderizarCardsPontos(pontos);
 

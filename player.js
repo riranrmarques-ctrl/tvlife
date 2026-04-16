@@ -23,7 +23,7 @@ function mostrarMensagem(texto, detalhe = "") {
 
 function criarSupabaseClient() {
   if (!window.supabase || !window.supabase.createClient) {
-    mostrarMensagem("Supabase não carregou.", "Verifique a internet ou o CDN do Supabase.");
+    mostrarMensagem("Supabase nao carregou.", "Verifique a internet ou o CDN do Supabase.");
     return false;
   }
 
@@ -38,8 +38,13 @@ function limparTimeout() {
   }
 }
 
-function detectarTipo(url) {
+function detectarTipo(url, tipoOriginal = "") {
+  const tipo = String(tipoOriginal || "").toLowerCase();
   const limpa = String(url || "").toLowerCase().split("?")[0];
+
+  if (tipo === "imagem" || tipo === "image") return "imagem";
+  if (tipo === "video") return "video";
+  if (tipo === "site" || tipo === "texto" || tipo === "text") return "site";
 
   if (
     limpa.endsWith(".jpg") ||
@@ -57,6 +62,52 @@ function detectarTipo(url) {
   return "video";
 }
 
+function normalizarUrlSite(url) {
+  let final = String(url || "").trim();
+
+  if (!final) return "";
+
+  if (!/^https?:\/\//i.test(final)) {
+    final = `https://${final.replace(/^\/+/, "")}`;
+  }
+
+  return final;
+}
+
+function extrairUrlDoTexto(texto) {
+  const conteudo = String(texto || "").trim();
+
+  const matchInternetShortcut = conteudo.match(/URL\s*=\s*(.+)/i);
+  if (matchInternetShortcut && matchInternetShortcut[1]) {
+    return normalizarUrlSite(matchInternetShortcut[1]);
+  }
+
+  const matchUrlDireta = conteudo.match(/https?:\/\/[^\s]+/i);
+  if (matchUrlDireta && matchUrlDireta[0]) {
+    return normalizarUrlSite(matchUrlDireta[0]);
+  }
+
+  const linhas = conteudo
+    .split(/\r?\n/)
+    .map(linha => linha.trim())
+    .filter(Boolean);
+
+  for (const linha of linhas) {
+    if (
+      linha.includes(".com") ||
+      linha.includes(".com.br") ||
+      linha.includes(".app.br") ||
+      linha.includes(".net") ||
+      linha.includes(".org") ||
+      linha.includes(".br/")
+    ) {
+      return normalizarUrlSite(linha.replace(/^URL\s*=/i, ""));
+    }
+  }
+
+  return "";
+}
+
 function itemEstaAtivo(item) {
   if (item.ativo === false) return false;
 
@@ -67,28 +118,6 @@ function itemEstaAtivo(item) {
 
   fim.setHours(23, 59, 59, 999);
   return fim >= new Date();
-}
-
-function extrairUrlDoTexto(texto) {
-  const conteudo = String(texto || "").trim();
-
-  const matchInternetShortcut = conteudo.match(/URL\s*=\s*(.+)/i);
-  if (matchInternetShortcut && matchInternetShortcut[1]) {
-    let url = matchInternetShortcut[1].trim();
-
-    if (!/^https?:\/\//i.test(url)) {
-      url = `https://${url.replace(/^\/+/, "")}`;
-    }
-
-    return url;
-  }
-
-  const matchUrlDireta = conteudo.match(/https?:\/\/[^\s]+/i);
-  if (matchUrlDireta && matchUrlDireta[0]) {
-    return matchUrlDireta[0].trim();
-  }
-
-  return "";
 }
 
 async function registrarPing() {
@@ -106,8 +135,41 @@ async function registrarPing() {
   }
 }
 
+async function resolverItem(item) {
+  let url = item.arquivo_url || item.video_url || "";
+  let tipo = detectarTipo(url, item.tipo);
+
+  if (tipo === "site" && String(url).toLowerCase().split("?")[0].endsWith(".txt")) {
+    try {
+      const resposta = await fetch(url, { cache: "no-store" });
+
+      if (!resposta.ok) {
+        throw new Error(`Erro ao ler TXT: ${resposta.status}`);
+      }
+
+      const texto = await resposta.text();
+      const urlExtraida = extrairUrlDoTexto(texto);
+
+      if (urlExtraida) {
+        url = urlExtraida;
+      } else {
+        console.warn("TXT sem URL reconhecida:", texto);
+      }
+    } catch (error) {
+      console.error("Erro ao processar arquivo TXT:", error);
+    }
+  }
+
+  return {
+    id: item.id,
+    nome: item.nome || item.nome_arquivo || "Arquivo",
+    url,
+    tipo
+  };
+}
+
 async function buscarPlaylist() {
-  mostrarMensagem("Buscando conteúdo...", `Código: ${codigoAtual}`);
+  mostrarMensagem("Buscando conteudo...", `Codigo: ${codigoAtual}`);
 
   const { data, error } = await supabaseClient
     .from(TABELA)
@@ -123,49 +185,18 @@ async function buscarPlaylist() {
 
   const lista = (data || [])
     .filter(itemEstaAtivo)
-    .filter(item => item.arquivo_url);
+    .filter(item => item.arquivo_url || item.video_url);
 
   if (!lista.length) {
-    mostrarMensagem("Sem conteúdo para este código.", `Código: ${codigoAtual}`);
+    mostrarMensagem("Sem conteudo para este codigo.", `Codigo: ${codigoAtual}`);
     return false;
   }
 
-  playlistAtual = await Promise.all(
-    lista.map(async item => {
-      let url = item.arquivo_url;
-      let tipo = item.tipo || detectarTipo(url);
-
-      if (tipo === "texto") {
-        tipo = "site";
-      }
-
-      if (tipo === "site" && String(url).toLowerCase().includes(".txt")) {
-        try {
-          const resposta = await fetch(url, { cache: "no-store" });
-          const texto = await resposta.text();
-          const urlExtraida = extrairUrlDoTexto(texto);
-
-          if (urlExtraida) {
-            url = urlExtraida;
-          }
-        } catch (error) {
-          console.error("Erro ao ler TXT:", error);
-        }
-      }
-
-      return {
-        id: item.id,
-        nome: item.nome || "Arquivo",
-        url,
-        tipo
-      };
-    })
-  );
-
+  playlistAtual = await Promise.all(lista.map(resolverItem));
   playlistAtual = playlistAtual.filter(item => item.url);
 
   if (!playlistAtual.length) {
-    mostrarMensagem("Conteúdo encontrado, mas sem URL válida.");
+    mostrarMensagem("Conteudo encontrado, mas sem URL valida.");
     return false;
   }
 
@@ -176,7 +207,7 @@ function proximo() {
   limparTimeout();
 
   if (!playlistAtual.length) {
-    mostrarMensagem("Sem conteúdo para reproduzir.");
+    mostrarMensagem("Sem conteudo para reproduzir.");
     return;
   }
 
@@ -219,7 +250,7 @@ function tocarVideo(item) {
   const video = document.getElementById("videoPlayer");
 
   if (!video) {
-    mostrarMensagem("Erro ao iniciar vídeo.");
+    mostrarMensagem("Erro ao iniciar video.");
     return;
   }
 
@@ -243,23 +274,35 @@ function tocarVideo(item) {
   video.onended = proximo;
 
   video.onerror = () => {
-    console.error("Erro ao carregar vídeo:", item.url);
-    mostrarMensagem("Erro ao carregar vídeo.", item.nome);
+    console.error("Erro ao carregar video:", item.url);
+    mostrarMensagem("Erro ao carregar video.", item.nome);
     timeoutMidia = setTimeout(proximo, 3000);
   };
 
   timeoutMidia = setTimeout(() => {
     if (video.readyState === 0) {
-      mostrarMensagem("Vídeo demorou para carregar.", "Pulando para o próximo item...");
+      mostrarMensagem("Video demorou para carregar.", "Pulando para o proximo item...");
       setTimeout(proximo, 2000);
     }
   }, 15000);
 }
 
 function tocarSite(item) {
+  const url = normalizarUrlSite(item.url);
+
+  if (!url) {
+    mostrarMensagem("URL do site invalida.", item.nome);
+    timeoutMidia = setTimeout(proximo, 3000);
+    return;
+  }
+
   document.body.innerHTML = `
     <div class="player-container">
-      <iframe src="${item.url}" allow="autoplay; fullscreen"></iframe>
+      <iframe
+        src="${url}"
+        allow="autoplay; fullscreen"
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
     </div>
   `;
 
@@ -270,7 +313,7 @@ function tocarMidia() {
   limparTimeout();
 
   if (!playlistAtual.length) {
-    mostrarMensagem("Sem conteúdo para reproduzir.");
+    mostrarMensagem("Sem conteudo para reproduzir.");
     return;
   }
 
@@ -310,7 +353,7 @@ async function iniciar() {
     codigoAtual = params.get("codigo");
 
     if (!codigoAtual) {
-      mostrarMensagem("Código não informado.", "Exemplo: player.html?codigo=H4E9L2A");
+      mostrarMensagem("Codigo nao informado.", "Exemplo: player.html?codigo=H4E9L2A");
       return;
     }
 
@@ -323,6 +366,17 @@ async function iniciar() {
     if (encontrou) {
       tocarMidia();
     }
+
+    setInterval(registrarPing, 60000);
+
+    setInterval(async () => {
+      const tinhaConteudo = playlistAtual.length > 0;
+      const encontrouAtualizacao = await buscarPlaylist();
+
+      if (!tinhaConteudo && encontrouAtualizacao) {
+        tocarMidia();
+      }
+    }, 30000);
   } catch (error) {
     console.error("Erro geral no player:", error);
     mostrarMensagem("Erro geral no player.", error.message || "Veja o console do navegador.");

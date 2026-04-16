@@ -6,7 +6,8 @@
   <title>Duna TV Player</title>
 
   <style>
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       width: 100%;
@@ -24,11 +25,28 @@
       background: #000;
     }
 
-    video {
+    video,
+    img,
+    iframe,
+    .texto-player {
       width: 100%;
       height: 100%;
       object-fit: cover;
       background: #000;
+    }
+
+    .texto-player {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 42px;
+      line-height: 1.35;
+      text-align: center;
+      padding: 48px;
+      box-sizing: border-box;
+      white-space: pre-wrap;
     }
 
     .mensagem {
@@ -42,17 +60,17 @@
 </head>
 <body>
 
-  <div class="player-container">
-    <video 
-      id="videoPlayer" 
-      autoplay 
-      muted 
+  <div class="player-container" id="playerContainer">
+    <video
+      id="videoPlayer"
+      autoplay
+      muted
       playsinline
     ></video>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="player.js?v=2"></script>
+  <script src="player.js?v=3"></script>
 
 </body>
 </html>

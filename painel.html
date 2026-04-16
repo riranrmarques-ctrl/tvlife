@@ -119,7 +119,6 @@
     #codigoAtual,
     .playlist-secao-topo h4,
     .playlist-header-linha span,
-    .historico-lista,
     .playlist-lista,
     .status-destaque,
     .status-topo {
@@ -231,17 +230,11 @@
     }
 
     .playlist-layout-novo,
-    .playlist-coluna-ativa,
-    .playlist-coluna-historico {
+    .playlist-coluna-ativa {
       background: transparent !important;
     }
 
     .playlist-secao {
-      background: #ffffff !important;
-    }
-
-    .playlist-secao-ativa,
-    .playlist-secao-historico {
       background: #ffffff !important;
     }
 
@@ -250,14 +243,23 @@
       border: 1px solid var(--claro-borda) !important;
       border-radius: 12px;
       padding: 10px 14px;
+      display: grid;
+      grid-template-columns: 42px 1fr 96px;
+      gap: 12px;
+      align-items: center;
     }
 
-    #playlistAtiva,
-    #historicoEncerramento,
-    #historicoStatus {
+    #playlistAtiva {
       background: #fcfdff !important;
       border: 1px solid var(--claro-borda) !important;
       border-radius: 14px;
+    }
+
+    .playlist-item-linha {
+      display: grid;
+      grid-template-columns: 32px 42px 1fr 96px;
+      gap: 12px;
+      align-items: center;
     }
 
     .status-bolinha {
@@ -341,187 +343,107 @@
         <div class="pontos-box">
 
           <div class="card-ponto" data-codigo="H4E9L2A">
-            <div class="card-status-topo">
-              <span class="status-bolinha"></span>
-              <span class="card-status">Status...</span>
-            </div>
-            <div class="card-imagem-box">
-              <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
-            </div>
+            <div class="card-status-topo"><span class="status-bolinha"></span><span class="card-status">Status...</span></div>
+            <div class="card-imagem-box"><img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto"></div>
             <div class="card-conteudo">
               <div class="card-nome">Carregando...</div>
               <div class="card-info-linha">
                 <div class="card-cidade">Cidade não definida</div>
-                <div class="card-codigo-area">
-                  <div class="card-codigo">H4E9L2A</div>
-                  <button class="btn-copiar" data-codigo="H4E9L2A" title="Copiar código" type="button">⧉</button>
-                </div>
+                <div class="card-codigo-area"><div class="card-codigo">H4E9L2A</div><button class="btn-copiar" data-codigo="H4E9L2A" title="Copiar código" type="button">⧉</button></div>
               </div>
             </div>
-            <div class="card-acoes">
-              <button class="btn-abrir" data-codigo="H4E9L2A" type="button">Abrir pasta</button>
-            </div>
+            <div class="card-acoes"><button class="btn-abrir" data-codigo="H4E9L2A" type="button">Abrir pasta</button></div>
           </div>
 
           <div class="card-ponto" data-codigo="N7H3E8L">
-            <div class="card-status-topo">
-              <span class="status-bolinha"></span>
-              <span class="card-status">Status...</span>
-            </div>
-            <div class="card-imagem-box">
-              <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
-            </div>
+            <div class="card-status-topo"><span class="status-bolinha"></span><span class="card-status">Status...</span></div>
+            <div class="card-imagem-box"><img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto"></div>
             <div class="card-conteudo">
               <div class="card-nome">Carregando...</div>
               <div class="card-info-linha">
                 <div class="card-cidade">Cidade não definida</div>
-                <div class="card-codigo-area">
-                  <div class="card-codigo">N7H3E8L</div>
-                  <button class="btn-copiar" data-codigo="N7H3E8L" title="Copiar código" type="button">⧉</button>
-                </div>
+                <div class="card-codigo-area"><div class="card-codigo">N7H3E8L</div><button class="btn-copiar" data-codigo="N7H3E8L" title="Copiar código" type="button">⧉</button></div>
               </div>
             </div>
-            <div class="card-acoes">
-              <button class="btn-abrir" data-codigo="N7H3E8L" type="button">Abrir pasta</button>
-            </div>
+            <div class="card-acoes"><button class="btn-abrir" data-codigo="N7H3E8L" type="button">Abrir pasta</button></div>
           </div>
 
           <div class="card-ponto" data-codigo="E2A6H9N">
-            <div class="card-status-topo">
-              <span class="status-bolinha"></span>
-              <span class="card-status">Status...</span>
-            </div>
-            <div class="card-imagem-box">
-              <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
-            </div>
+            <div class="card-status-topo"><span class="status-bolinha"></span><span class="card-status">Status...</span></div>
+            <div class="card-imagem-box"><img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto"></div>
             <div class="card-conteudo">
               <div class="card-nome">Carregando...</div>
               <div class="card-info-linha">
                 <div class="card-cidade">Cidade não definida</div>
-                <div class="card-codigo-area">
-                  <div class="card-codigo">E2A6H9N</div>
-                  <button class="btn-copiar" data-codigo="E2A6H9N" title="Copiar código" type="button">⧉</button>
-                </div>
+                <div class="card-codigo-area"><div class="card-codigo">E2A6H9N</div><button class="btn-copiar" data-codigo="E2A6H9N" title="Copiar código" type="button">⧉</button></div>
               </div>
             </div>
-            <div class="card-acoes">
-              <button class="btn-abrir" data-codigo="E2A6H9N" type="button">Abrir pasta</button>
-            </div>
+            <div class="card-acoes"><button class="btn-abrir" data-codigo="E2A6H9N" type="button">Abrir pasta</button></div>
           </div>
 
           <div class="card-ponto" data-codigo="L8E1N5A">
-            <div class="card-status-topo">
-              <span class="status-bolinha"></span>
-              <span class="card-status">Status...</span>
-            </div>
-            <div class="card-imagem-box">
-              <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
-            </div>
+            <div class="card-status-topo"><span class="status-bolinha"></span><span class="card-status">Status...</span></div>
+            <div class="card-imagem-box"><img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto"></div>
             <div class="card-conteudo">
               <div class="card-nome">Carregando...</div>
               <div class="card-info-linha">
                 <div class="card-cidade">Cidade não definida</div>
-                <div class="card-codigo-area">
-                  <div class="card-codigo">L8E1N5A</div>
-                  <button class="btn-copiar" data-codigo="L8E1N5A" title="Copiar código" type="button">⧉</button>
-                </div>
+                <div class="card-codigo-area"><div class="card-codigo">L8E1N5A</div><button class="btn-copiar" data-codigo="L8E1N5A" title="Copiar código" type="button">⧉</button></div>
               </div>
             </div>
-            <div class="card-acoes">
-              <button class="btn-abrir" data-codigo="L8E1N5A" type="button">Abrir pasta</button>
-            </div>
+            <div class="card-acoes"><button class="btn-abrir" data-codigo="L8E1N5A" type="button">Abrir pasta</button></div>
           </div>
 
           <div class="card-ponto" data-codigo="H6N4E7A">
-            <div class="card-status-topo">
-              <span class="status-bolinha"></span>
-              <span class="card-status">Status...</span>
-            </div>
-            <div class="card-imagem-box">
-              <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
-            </div>
+            <div class="card-status-topo"><span class="status-bolinha"></span><span class="card-status">Status...</span></div>
+            <div class="card-imagem-box"><img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto"></div>
             <div class="card-conteudo">
               <div class="card-nome">Carregando...</div>
               <div class="card-info-linha">
                 <div class="card-cidade">Cidade não definida</div>
-                <div class="card-codigo-area">
-                  <div class="card-codigo">H6N4E7A</div>
-                  <button class="btn-copiar" data-codigo="H6N4E7A" title="Copiar código" type="button">⧉</button>
-                </div>
+                <div class="card-codigo-area"><div class="card-codigo">H6N4E7A</div><button class="btn-copiar" data-codigo="H6N4E7A" title="Copiar código" type="button">⧉</button></div>
               </div>
             </div>
-            <div class="card-acoes">
-              <button class="btn-abrir" data-codigo="H6N4E7A" type="button">Abrir pasta</button>
-            </div>
+            <div class="card-acoes"><button class="btn-abrir" data-codigo="H6N4E7A" type="button">Abrir pasta</button></div>
           </div>
 
           <div class="card-ponto" data-codigo="A9L3E2H">
-            <div class="card-status-topo">
-              <span class="status-bolinha"></span>
-              <span class="card-status">Status...</span>
-            </div>
-            <div class="card-imagem-box">
-              <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
-            </div>
+            <div class="card-status-topo"><span class="status-bolinha"></span><span class="card-status">Status...</span></div>
+            <div class="card-imagem-box"><img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto"></div>
             <div class="card-conteudo">
               <div class="card-nome">Carregando...</div>
               <div class="card-info-linha">
                 <div class="card-cidade">Cidade não definida</div>
-                <div class="card-codigo-area">
-                  <div class="card-codigo">A9L3E2H</div>
-                  <button class="btn-copiar" data-codigo="A9L3E2H" title="Copiar código" type="button">⧉</button>
-                </div>
+                <div class="card-codigo-area"><div class="card-codigo">A9L3E2H</div><button class="btn-copiar" data-codigo="A9L3E2H" title="Copiar código" type="button">⧉</button></div>
               </div>
             </div>
-            <div class="card-acoes">
-              <button class="btn-abrir" data-codigo="A9L3E2H" type="button">Abrir pasta</button>
-            </div>
+            <div class="card-acoes"><button class="btn-abrir" data-codigo="A9L3E2H" type="button">Abrir pasta</button></div>
           </div>
 
           <div class="card-ponto" data-codigo="E5H8A1N">
-            <div class="card-status-topo">
-              <span class="status-bolinha"></span>
-              <span class="card-status">Status...</span>
-            </div>
-            <div class="card-imagem-box">
-              <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
-            </div>
+            <div class="card-status-topo"><span class="status-bolinha"></span><span class="card-status">Status...</span></div>
+            <div class="card-imagem-box"><img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto"></div>
             <div class="card-conteudo">
               <div class="card-nome">Carregando...</div>
               <div class="card-info-linha">
                 <div class="card-cidade">Cidade não definida</div>
-                <div class="card-codigo-area">
-                  <div class="card-codigo">E5H8A1N</div>
-                  <button class="btn-copiar" data-codigo="E5H8A1N" title="Copiar código" type="button">⧉</button>
-                </div>
+                <div class="card-codigo-area"><div class="card-codigo">E5H8A1N</div><button class="btn-copiar" data-codigo="E5H8A1N" title="Copiar código" type="button">⧉</button></div>
               </div>
             </div>
-            <div class="card-acoes">
-              <button class="btn-abrir" data-codigo="E5H8A1N" type="button">Abrir pasta</button>
-            </div>
+            <div class="card-acoes"><button class="btn-abrir" data-codigo="E5H8A1N" type="button">Abrir pasta</button></div>
           </div>
 
           <div class="card-ponto" data-codigo="N2E7L4A">
-            <div class="card-status-topo">
-              <span class="status-bolinha"></span>
-              <span class="card-status">Status...</span>
-            </div>
-            <div class="card-imagem-box">
-              <img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto">
-            </div>
+            <div class="card-status-topo"><span class="status-bolinha"></span><span class="card-status">Status...</span></div>
+            <div class="card-imagem-box"><img class="card-imagem" src="https://placehold.co/600x320/png" alt="Imagem do ponto"></div>
             <div class="card-conteudo">
               <div class="card-nome">Carregando...</div>
               <div class="card-info-linha">
                 <div class="card-cidade">Cidade não definida</div>
-                <div class="card-codigo-area">
-                  <div class="card-codigo">N2E7L4A</div>
-                  <button class="btn-copiar" data-codigo="N2E7L4A" title="Copiar código" type="button">⧉</button>
-                </div>
+                <div class="card-codigo-area"><div class="card-codigo">N2E7L4A</div><button class="btn-copiar" data-codigo="N2E7L4A" title="Copiar código" type="button">⧉</button></div>
               </div>
             </div>
-            <div class="card-acoes">
-              <button class="btn-abrir" data-codigo="N2E7L4A" type="button">Abrir pasta</button>
-            </div>
+            <div class="card-acoes"><button class="btn-abrir" data-codigo="N2E7L4A" type="button">Abrir pasta</button></div>
           </div>
 
         </div>
@@ -533,7 +455,6 @@
             <button id="btnVoltar" type="button" class="btn-secundario btn-voltar-topo">← Voltar</button>
             <span class="topbar-titulo">Gerencie e organize a sua playlist</span>
           </div>
-
           <div class="topbar-direita">
             <div id="statusPonto" class="status-destaque"></div>
           </div>
@@ -561,7 +482,7 @@
               <div class="playlist-acoes-topo">
                 <button id="btnEditarInfo" type="button" class="btn-secundario">Editar informações</button>
                 <button id="btnUpgrade" type="button" class="btn-secundario">Upgrade</button>
-                <input id="inputUpgrade" type="file" accept=".mp4,.jpg,.jpeg,.txt,video/*,image/jpeg,text/plain" style="display:none;">
+                <input id="inputUpgrade" type="file" accept=".mp4,.jpg,.jpeg,.png,.webp,.txt,video/*,image/*,text/plain" style="display:none;">
               </div>
             </div>
           </div>
@@ -577,28 +498,10 @@
               <div class="playlist-header-linha">
                 <span>#</span>
                 <span>Arquivo</span>
-                <span>Postado</span>
-                <span>Encerramento</span>
                 <span></span>
               </div>
 
               <div id="playlistAtiva" class="playlist-lista"></div>
-            </div>
-          </div>
-
-          <div class="playlist-coluna-historico">
-            <div class="playlist-secao playlist-secao-historico">
-              <div class="playlist-secao-topo">
-                <h4>Histórico de encerramento</h4>
-              </div>
-              <div id="historicoEncerramento" class="historico-lista"></div>
-            </div>
-
-            <div class="playlist-secao playlist-secao-historico">
-              <div class="playlist-secao-topo">
-                <h4>Histórico de status</h4>
-              </div>
-              <div id="historicoStatus" class="historico-lista"></div>
             </div>
           </div>
         </div>
@@ -627,6 +530,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="painel.js?v=101"></script>
+  <script src="painel.js?v=104"></script>
 </body>
 </html>

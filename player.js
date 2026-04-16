@@ -296,7 +296,18 @@ function tocarSite(item) {
     return;
   }
 
-  window.location.href = url;
+  document.body.innerHTML = `
+    <div class="player-container">
+      <iframe
+        src="${url}"
+        allow="autoplay; fullscreen"
+        referrerpolicy="no-referrer-when-downgrade"
+        style="width:100vw;height:100vh;border:0;background:#000;"
+      ></iframe>
+    </div>
+  `;
+
+  timeoutMidia = setTimeout(proximo, 30000);
 }
 
 function tocarMidia() {

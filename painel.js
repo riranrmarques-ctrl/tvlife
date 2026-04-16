@@ -44,13 +44,14 @@ let arquivoImagemEdicao = null;
 let statusAnteriorMap = {};
 let posicaoImagemAtual = { x: 50, y: 50 };
 let arrastandoPreview = false;
-
 let playlistSchema = null;
 
 function setStatus(texto, tipo = "normal") {
   if (!statusEl) return;
+
   statusEl.textContent = texto;
-  statusEl.className = "status-box";
+  statusEl.classList.remove("ok", "erro");
+
   if (tipo === "ok") statusEl.classList.add("ok");
   if (tipo === "erro") statusEl.classList.add("erro");
 }
@@ -82,6 +83,7 @@ function calcularStatusInfo(ponto) {
   }
 
   const dataPing = new Date(ponto.ultimo_ping);
+
   if (Number.isNaN(dataPing.getTime())) {
     return {
       texto: "Inativo",
@@ -113,15 +115,19 @@ function calcularStatusInfo(ponto) {
 
 function formatarData(valor) {
   if (!valor) return "Sem data";
+
   const data = new Date(valor);
   if (Number.isNaN(data.getTime())) return "Sem data";
+
   return data.toLocaleDateString("pt-BR");
 }
 
 function formatarDataHora(valor) {
   if (!valor) return "Sem data";
+
   const data = new Date(valor);
   if (Number.isNaN(data.getTime())) return "Sem data";
+
   return data.toLocaleString("pt-BR");
 }
 
@@ -220,6 +226,7 @@ function detectarTipoArquivo(file) {
   if (mime.startsWith("video/") || nome.endsWith(".mp4")) return "video";
   if (mime === "image/jpeg" || nome.endsWith(".jpg") || nome.endsWith(".jpeg")) return "imagem";
   if (mime.startsWith("text/") || nome.endsWith(".txt")) return "texto";
+
   return null;
 }
 
@@ -272,126 +279,17 @@ async function uploadArquivoPlaylist(file, codigo) {
 async function detectarSchemaPlaylist() {
   if (playlistSchema) return playlistSchema;
 
-  const schema = {
+  playlistSchema = {
     tipo: "novo",
     campoCodigo: "codigo",
     campoNome: "nome",
     campoDataFim: "data_fim",
     campoDataCriacao: "created_at",
-    temOrdem: false,
-    temCaminhoStorage: false,
-    temAtivo: false
+    temOrdem: true,
+    temCaminhoStorage: true,
+    temAtivo: true
   };
 
-  const testeLegado = await supabaseClient
-    .from(TABELA)
-    .select("id,codigo_ponto,nome_arquivo,arquivo_url,data_postagem,data_encerramento", { head: false })
-    .limit(1);
-
-  if (!testeLegado.error) {
-    schema.tipo = "legado";
-    schema.campoCodigo = "codigo_ponto";
-    schema.campoNome = "nome_arquivo";
-    schema.campoDataFim = "data_encerramento";
-    schema.campoDataCriacao = "data_postagem";
-  } else {
-    const testeCodigo = await supabaseClient
-      .from(TABELA)
-      .select("codigo", { head: false })
-      .limit(1);
-
-    if (testeCodigo.error) {
-      const testeCodigoPonto = await supabaseClient
-        .from(TABELA)
-        .select("codigo_ponto", { head: false })
-        .limit(1);
-
-      if (!testeCodigoPonto.error) {
-        schema.campoCodigo = "codigo_ponto";
-      }
-    }
-
-    const testeNome = await supabaseClient
-      .from(TABELA)
-      .select("nome", { head: false })
-      .limit(1);
-
-    if (testeNome.error) {
-      const testeNomeArquivo = await supabaseClient
-        .from(TABELA)
-        .select("nome_arquivo", { head: false })
-        .limit(1);
-
-      if (!testeNomeArquivo.error) {
-        schema.campoNome = "nome_arquivo";
-      }
-    }
-
-    const testeDataFim = await supabaseClient
-      .from(TABELA)
-      .select("data_fim", { head: false })
-      .limit(1);
-
-    if (testeDataFim.error) {
-      const testeDataEncerramento = await supabaseClient
-        .from(TABELA)
-        .select("data_encerramento", { head: false })
-        .limit(1);
-
-      if (!testeDataEncerramento.error) {
-        schema.campoDataFim = "data_encerramento";
-      } else {
-        schema.campoDataFim = null;
-      }
-    }
-
-    const testeCreatedAt = await supabaseClient
-      .from(TABELA)
-      .select("created_at", { head: false })
-      .limit(1);
-
-    if (testeCreatedAt.error) {
-      const testeCriadoEm = await supabaseClient
-        .from(TABELA)
-        .select("criado_em", { head: false })
-        .limit(1);
-
-      if (!testeCriadoEm.error) {
-        schema.campoDataCriacao = "criado_em";
-      } else {
-        schema.campoDataCriacao = null;
-      }
-    }
-  }
-
-  const testeOrdem = await supabaseClient
-    .from(TABELA)
-    .select("ordem", { head: false })
-    .limit(1);
-
-  if (!testeOrdem.error) {
-    schema.temOrdem = true;
-  }
-
-  const testeCaminho = await supabaseClient
-    .from(TABELA)
-    .select("caminho_storage", { head: false })
-    .limit(1);
-
-  if (!testeCaminho.error) {
-    schema.temCaminhoStorage = true;
-  }
-
-  const testeAtivo = await supabaseClient
-    .from(TABELA)
-    .select("ativo", { head: false })
-    .limit(1);
-
-  if (!testeAtivo.error) {
-    schema.temAtivo = true;
-  }
-
-  playlistSchema = schema;
   return playlistSchema;
 }
 
@@ -451,7 +349,10 @@ if (senhaInput) {
 }
 
 async function buscarPontos() {
-  const { data, error } = await supabaseClient.from(TABELA_PONTOS).select("*");
+  const { data, error } = await supabaseClient
+    .from(TABELA_PONTOS)
+    .select("*")
+    .order("codigo", { ascending: true });
 
   if (error) {
     console.error(error);
@@ -464,6 +365,7 @@ async function buscarPontos() {
 
 function renderizarCardsPontos(lista) {
   pontosMap = {};
+
   lista.forEach(p => {
     pontosMap[p.codigo] = p;
   });
@@ -571,10 +473,12 @@ function abrirModalEdicao() {
   if (editNome) editNome.value = ponto.nome || "";
   if (editCidade) editCidade.value = ponto.cidade || "";
   if (editEndereco) editEndereco.value = ponto.endereco || "";
+
   if (previewImagem) {
     previewImagem.src = obterImagemPonto(ponto);
     aplicarPosicaoImagem(previewImagem, posicaoImagemAtual);
   }
+
   if (inputImagem) inputImagem.value = "";
 
   arquivoImagemEdicao = null;
@@ -583,9 +487,11 @@ function abrirModalEdicao() {
 
 function fecharModalEdicao() {
   if (!modalEditar) return;
+
   modalEditar.style.display = "none";
   arquivoImagemEdicao = null;
   arrastandoPreview = false;
+
   if (inputImagem) inputImagem.value = "";
 }
 
@@ -638,12 +544,14 @@ if (inputImagem) {
     posicaoImagemAtual = { x: 50, y: 50 };
 
     const reader = new FileReader();
+
     reader.onload = evento => {
       if (previewImagem) {
         previewImagem.src = evento.target.result;
         aplicarPosicaoImagem(previewImagem, posicaoImagemAtual);
       }
     };
+
     reader.readAsDataURL(arquivo);
   });
 }
@@ -659,6 +567,7 @@ if (previewImagem) {
 
   window.addEventListener("mouseup", () => {
     arrastandoPreview = false;
+
     if (previewImagem) {
       previewImagem.style.cursor = "grab";
     }
@@ -757,6 +666,7 @@ if (btnUpgrade && inputUpgrade) {
       setStatus("Abra um ponto primeiro", "erro");
       return;
     }
+
     inputUpgrade.value = "";
     inputUpgrade.click();
   };
@@ -824,6 +734,7 @@ if (btnUpgrade && inputUpgrade) {
 
 function montarAcoesPlaylist(item) {
   const url = item.arquivo_url ? String(item.arquivo_url) : "";
+
   const abrir = url
     ? `<a class="playlist-acao" href="${url}" target="_blank" rel="noopener noreferrer" title="Abrir">↗</a>`
     : "";
@@ -906,18 +817,21 @@ async function carregarPlaylist() {
 
   const schema = await detectarSchemaPlaylist();
 
-  const queryPlaylist = supabaseClient
+  let queryPlaylist = supabaseClient
     .from(TABELA)
     .select("*")
     .eq(schema.campoCodigo, codigoSelecionado);
 
   if (schema.temOrdem) {
-    queryPlaylist.order("ordem", { ascending: true });
+    queryPlaylist = queryPlaylist.order("ordem", { ascending: true });
   } else if (schema.campoDataCriacao) {
-    queryPlaylist.order(schema.campoDataCriacao, { ascending: true });
+    queryPlaylist = queryPlaylist.order(schema.campoDataCriacao, { ascending: true });
   }
 
-  const [{ data: playlistData, error: playlistError }, { data: historicoData, error: historicoError }] = await Promise.all([
+  const [
+    { data: playlistData, error: playlistError },
+    { data: historicoData, error: historicoError }
+  ] = await Promise.all([
     queryPlaylist,
     supabaseClient
       .from(TABELA_HISTORICO_CONEXAO)
@@ -1039,6 +953,7 @@ function ativarDrag(lista) {
 
     item.addEventListener("dragover", e => {
       e.preventDefault();
+
       if (!item.classList.contains("drag-over")) {
         limparEstadosDrag();
         item.classList.add("drag-over");
@@ -1054,12 +969,14 @@ function ativarDrag(lista) {
       item.classList.add("drop-animating");
 
       const schema = await detectarSchemaPlaylist();
+
       if (!schema.temOrdem) {
         item.classList.remove("drop-animating");
         return;
       }
 
       const target = Number(item.dataset.index);
+
       if (Number.isNaN(dragIndex) || Number.isNaN(target) || dragIndex === target) {
         item.classList.remove("drop-animating");
         return;
@@ -1108,6 +1025,7 @@ async function iniciarPainel() {
   document.querySelectorAll(".btn-copiar").forEach(btn => {
     btn.onclick = async e => {
       e.stopPropagation();
+
       const codigo = btn.dataset.codigo;
       if (!codigo) return;
 

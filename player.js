@@ -4,11 +4,18 @@ const SUPABASE_KEY = "sb_publishable_EjuRWhlusDG2RLTAHFREQQ_-qZjxm3g";
 const TABELA = "playlists_novo";
 const TABELA_PONTOS = "pontos";
 
+const DURACAO_IMAGEM = 20000;
+const DURACAO_SITE = 10000;
+const INTERVALO_PING = 60000;
+const INTERVALO_ATUALIZAR_PLAYLIST = 30000;
+
 let supabaseClient = null;
 let codigoAtual = null;
 let playlistAtual = [];
 let indiceAtual = 0;
 let timeoutMidia = null;
+let cacheMidia = new Map();
+let primeiraBuscaFinalizada = false;
 
 function mostrarMensagem(texto, detalhe = "") {
   document.body.innerHTML = `
@@ -55,9 +62,7 @@ function detectarTipo(url, tipoOriginal = "") {
     return "imagem";
   }
 
-  if (limpa.endsWith(".txt")) {
-    return "site";
-  }
+  if (limpa.endsWith(".txt")) return "site";
 
   return "video";
 }
@@ -110,7 +115,6 @@ function extrairUrlDoTexto(texto) {
 
 function itemEstaAtivo(item) {
   if (item.ativo === false) return false;
-
   if (!item.data_fim) return true;
 
   const fim = new Date(item.data_fim);
@@ -125,14 +129,10 @@ async function registrarPing() {
 
   const { error } = await supabaseClient
     .from(TABELA_PONTOS)
-    .update({
-      ultimo_ping: new Date().toISOString()
-    })
+    .update({ ultimo_ping: new Date().toISOString() })
     .eq("codigo", codigoAtual);
 
-  if (error) {
-    console.error("Erro ao registrar ping:", error);
-  }
+  if (error) console.error("Erro ao registrar ping:", error);
 }
 
 async function resolverItem(item) {
@@ -152,8 +152,6 @@ async function resolverItem(item) {
 
       if (urlExtraida) {
         url = urlExtraida;
-      } else {
-        console.warn("TXT sem URL reconhecida:", texto);
       }
     } catch (error) {
       console.error("Erro ao processar arquivo TXT:", error);
@@ -168,8 +166,14 @@ async function resolverItem(item) {
   };
 }
 
-async function buscarPlaylist() {
-  mostrarMensagem("Buscando conteudo...", `Codigo: ${codigoAtual}`);
+function assinaturaPlaylist(lista) {
+  return lista.map(item => `${item.id}:${item.url}:${item.tipo}`).join("|");
+}
+
+async function buscarPlaylist({ silencioso = false } = {}) {
+  if (!silencioso) {
+    mostrarMensagem("Buscando conteudo...", `Codigo: ${codigoAtual}`);
+  }
 
   const { data, error } = await supabaseClient
     .from(TABELA)
@@ -179,7 +183,11 @@ async function buscarPlaylist() {
 
   if (error) {
     console.error("Erro Supabase:", error);
-    mostrarMensagem("Erro ao buscar playlist.", error.message || "Verifique a tabela playlists_novo.");
+
+    if (!silencioso) {
+      mostrarMensagem("Erro ao buscar playlist.", error.message || "Verifique a tabela playlists_novo.");
+    }
+
     return false;
   }
 
@@ -188,19 +196,103 @@ async function buscarPlaylist() {
     .filter(item => item.arquivo_url || item.video_url);
 
   if (!lista.length) {
-    mostrarMensagem("Sem conteudo para este codigo.", `Codigo: ${codigoAtual}`);
+    if (!silencioso) {
+      mostrarMensagem("Sem conteudo para este codigo.", `Codigo: ${codigoAtual}`);
+    }
+
+    playlistAtual = [];
     return false;
   }
 
-  playlistAtual = await Promise.all(lista.map(resolverItem));
-  playlistAtual = playlistAtual.filter(item => item.url);
+  const novaPlaylist = await Promise.all(lista.map(resolverItem));
+  const limpa = novaPlaylist.filter(item => item.url);
 
-  if (!playlistAtual.length) {
-    mostrarMensagem("Conteudo encontrado, mas sem URL valida.");
+  if (!limpa.length) {
+    if (!silencioso) {
+      mostrarMensagem("Conteudo encontrado, mas sem URL valida.");
+    }
+
+    playlistAtual = [];
     return false;
+  }
+
+  const assinaturaAntiga = assinaturaPlaylist(playlistAtual);
+  const assinaturaNova = assinaturaPlaylist(limpa);
+
+  playlistAtual = limpa;
+
+  if (indiceAtual >= playlistAtual.length) {
+    indiceAtual = 0;
+  }
+
+  primeiraBuscaFinalizada = true;
+
+  if (assinaturaAntiga !== assinaturaNova) {
+    limparCacheObsoleto();
+    preCarregarProximos(2);
   }
 
   return true;
+}
+
+function limparCacheObsoleto() {
+  const urlsAtuais = new Set(playlistAtual.map(item => item.url));
+
+  for (const url of cacheMidia.keys()) {
+    if (!urlsAtuais.has(url)) {
+      cacheMidia.delete(url);
+    }
+  }
+}
+
+function obterIndiceCircular(base, deslocamento) {
+  if (!playlistAtual.length) return 0;
+  return (base + deslocamento + playlistAtual.length) % playlistAtual.length;
+}
+
+function preCarregarItem(item) {
+  if (!item || !item.url || cacheMidia.has(item.url)) return;
+
+  if (item.tipo === "imagem") {
+    const img = new Image();
+    img.src = item.url;
+    cacheMidia.set(item.url, img);
+    return;
+  }
+
+  if (item.tipo === "video") {
+    const video = document.createElement("video");
+    video.preload = "auto";
+    video.muted = true;
+    video.playsInline = true;
+    video.src = item.url;
+    video.load();
+    cacheMidia.set(item.url, video);
+    return;
+  }
+
+  if (item.tipo === "site") {
+    const iframe = document.createElement("iframe");
+    iframe.src = normalizarUrlSite(item.url);
+    iframe.style.position = "absolute";
+    iframe.style.width = "1px";
+    iframe.style.height = "1px";
+    iframe.style.opacity = "0";
+    iframe.style.pointerEvents = "none";
+    iframe.style.left = "-9999px";
+    iframe.style.top = "-9999px";
+    document.body.appendChild(iframe);
+    cacheMidia.set(item.url, iframe);
+  }
+}
+
+function preCarregarProximos(quantidade = 2) {
+  if (!playlistAtual.length) return;
+
+  for (let i = 1; i <= quantidade; i++) {
+    const index = obterIndiceCircular(indiceAtual, i);
+    preCarregarItem(playlistAtual[index]);
+  }
 }
 
 function proximo() {
@@ -211,54 +303,62 @@ function proximo() {
     return;
   }
 
-  indiceAtual++;
-
-  if (indiceAtual >= playlistAtual.length) {
-    indiceAtual = 0;
-  }
-
+  indiceAtual = obterIndiceCircular(indiceAtual, 1);
   tocarMidia();
 }
 
 function tocarImagem(item) {
+  const imgCache = cacheMidia.get(item.url);
+
   document.body.innerHTML = `
-    <div class="player-container">
-      <img src="${item.url}" alt="">
-    </div>
+    <div class="player-container" id="playerContainer"></div>
   `;
 
-  const img = document.querySelector("img");
+  const container = document.getElementById("playerContainer");
+  const img = imgCache instanceof HTMLImageElement ? imgCache : new Image();
 
-  if (img) {
-    img.onerror = () => {
-      console.error("Erro ao carregar imagem:", item.url);
-      mostrarMensagem("Erro ao carregar imagem.", item.nome);
-      timeoutMidia = setTimeout(proximo, 3000);
-    };
-  }
+  img.alt = "";
+  img.style.width = "100vw";
+  img.style.height = "100vh";
+  img.style.objectFit = "cover";
+  img.style.background = "#000";
 
-  timeoutMidia = setTimeout(proximo, 20000);
+  if (!img.src) img.src = item.url;
+
+  img.onerror = () => {
+    console.error("Erro ao carregar imagem:", item.url);
+    mostrarMensagem("Erro ao carregar imagem.", item.nome);
+    timeoutMidia = setTimeout(proximo, 3000);
+  };
+
+  container.appendChild(img);
+
+  preCarregarProximos(2);
+  timeoutMidia = setTimeout(proximo, DURACAO_IMAGEM);
 }
 
 function tocarVideo(item) {
+  const videoCache = cacheMidia.get(item.url);
+
   document.body.innerHTML = `
-    <div class="player-container">
-      <video id="videoPlayer" autoplay muted playsinline preload="auto"></video>
-    </div>
+    <div class="player-container" id="playerContainer"></div>
   `;
 
-  const video = document.getElementById("videoPlayer");
+  const container = document.getElementById("playerContainer");
+  const video = videoCache instanceof HTMLVideoElement ? videoCache : document.createElement("video");
 
-  if (!video) {
-    mostrarMensagem("Erro ao iniciar video.");
-    return;
-  }
-
-  video.src = item.url;
-  video.muted = true;
+  video.id = "videoPlayer";
   video.autoplay = true;
+  video.muted = true;
   video.playsInline = true;
   video.controls = false;
+  video.preload = "auto";
+  video.style.width = "100vw";
+  video.style.height = "100vh";
+  video.style.objectFit = "cover";
+  video.style.background = "#000";
+
+  if (!video.src) video.src = item.url;
 
   video.onloadeddata = () => {
     video.play().catch(error => {
@@ -279,12 +379,18 @@ function tocarVideo(item) {
     timeoutMidia = setTimeout(proximo, 3000);
   };
 
+  container.appendChild(video);
+
+  preCarregarProximos(2);
+
   timeoutMidia = setTimeout(() => {
     if (video.readyState === 0) {
       mostrarMensagem("Video demorou para carregar.", "Pulando para o proximo item...");
       setTimeout(proximo, 2000);
     }
   }, 15000);
+
+  video.play().catch(() => {});
 }
 
 function tocarSite(item) {
@@ -296,18 +402,30 @@ function tocarSite(item) {
     return;
   }
 
+  const iframeCache = cacheMidia.get(item.url);
+
   document.body.innerHTML = `
-    <div class="player-container">
-      <iframe
-        src="${url}"
-        allow="autoplay; fullscreen"
-        referrerpolicy="no-referrer-when-downgrade"
-        style="width:100vw;height:100vh;border:0;background:#000;"
-      ></iframe>
-    </div>
+    <div class="player-container" id="playerContainer"></div>
   `;
 
-  timeoutMidia = setTimeout(proximo, 30000);
+  const container = document.getElementById("playerContainer");
+  const iframe = iframeCache instanceof HTMLIFrameElement ? iframeCache : document.createElement("iframe");
+
+  iframe.src = url;
+  iframe.allow = "autoplay; fullscreen";
+  iframe.referrerPolicy = "no-referrer-when-downgrade";
+  iframe.style.width = "100vw";
+  iframe.style.height = "100vh";
+  iframe.style.border = "0";
+  iframe.style.background = "#000";
+  iframe.style.position = "static";
+  iframe.style.opacity = "1";
+  iframe.style.pointerEvents = "auto";
+
+  container.appendChild(iframe);
+
+  preCarregarProximos(2);
+  timeoutMidia = setTimeout(proximo, DURACAO_SITE);
 }
 
 function tocarMidia() {
@@ -346,9 +464,7 @@ async function iniciar() {
   try {
     mostrarMensagem("Iniciando player...");
 
-    if (!criarSupabaseClient()) {
-      return;
-    }
+    if (!criarSupabaseClient()) return;
 
     const params = new URLSearchParams(window.location.search);
     codigoAtual = params.get("codigo");
@@ -365,19 +481,20 @@ async function iniciar() {
     const encontrou = await buscarPlaylist();
 
     if (encontrou) {
+      preCarregarProximos(2);
       tocarMidia();
     }
 
-    setInterval(registrarPing, 60000);
+    setInterval(registrarPing, INTERVALO_PING);
 
     setInterval(async () => {
       const tinhaConteudo = playlistAtual.length > 0;
-      const encontrouAtualizacao = await buscarPlaylist();
+      const encontrouAtualizacao = await buscarPlaylist({ silencioso: true });
 
       if (!tinhaConteudo && encontrouAtualizacao) {
         tocarMidia();
       }
-    }, 30000);
+    }, INTERVALO_ATUALIZAR_PLAYLIST);
   } catch (error) {
     console.error("Erro geral no player:", error);
     mostrarMensagem("Erro geral no player.", error.message || "Veja o console do navegador.");

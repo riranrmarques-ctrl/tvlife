@@ -296,17 +296,7 @@ function tocarSite(item) {
     return;
   }
 
-  document.body.innerHTML = `
-    <div class="player-container">
-      <iframe
-        src="${url}"
-        allow="autoplay; fullscreen"
-        referrerpolicy="no-referrer-when-downgrade"
-      ></iframe>
-    </div>
-  `;
-
-  timeoutMidia = setTimeout(proximo, 30000);
+  window.location.href = url;
 }
 
 function tocarMidia() {

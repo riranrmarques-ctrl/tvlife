@@ -240,9 +240,11 @@ function validarLogin() {
 }
 
 async function buscarPontos() {
+  setStatus("Carregando pontos...", "normal");
+
   const { data, error } = await supabaseClient
     .from(TABELA_PONTOS)
-    .select("*")
+    .select("codigo,nome,cidade,endereco,imagem_url,ultimo_ping")
     .order("codigo", { ascending: true });
 
   if (error) {
@@ -251,6 +253,7 @@ async function buscarPontos() {
     return [];
   }
 
+  setStatus("Painel Ativo", "ok");
   return data || [];
 }
 

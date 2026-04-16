@@ -46,7 +46,7 @@
 
     .topo-fixo.novo-topo {
       display: flex;
-      align-items: center;
+      align-items: center !important;
       justify-content: space-between;
       gap: 18px;
       padding: 18px 22px;
@@ -78,6 +78,9 @@
     }
 
     .menu-topo-btn {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
       background: #ffffff !important;
       color: var(--claro-texto) !important;
       border: 1px solid var(--claro-borda) !important;
@@ -279,7 +282,7 @@
     @media (max-width: 980px) {
       .topo-fixo.novo-topo {
         flex-direction: column;
-        align-items: stretch;
+        align-items: stretch !important;
       }
 
       .topo-centro {
@@ -311,19 +314,18 @@
 
     <div class="topo-fixo novo-topo">
       <div class="topo-esquerda">
-       <div class="topo-esquerda">
-  <div class="menu-topo-wrap">
-    <button class="menu-topo-btn" type="button">☰ Cidades</button>
+        <div class="menu-topo-wrap">
+          <button class="menu-topo-btn" type="button">☰ Cidades</button>
 
-    <div class="menu-topo-dropdown">
-      <a class="menu-item" href="#" data-cidade="ilheus">Ilhéus</a>
-      <a class="menu-item" href="#" data-cidade="itabuna">Itabuna</a>
-      <a class="menu-item" href="#" data-cidade="canaa">Canaã</a>
-      <a class="menu-item" href="#" data-cidade="itacare">Itacaré</a>
-      <a class="menu-item" href="#" data-cidade="canavieiras">Canavieiras</a>
-    </div>
-  </div>
-</div>
+          <div class="menu-topo-dropdown">
+            <a class="menu-item" href="#" data-cidade="ilheus">Ilhéus</a>
+            <a class="menu-item" href="#" data-cidade="itabuna">Itabuna</a>
+            <a class="menu-item" href="#" data-cidade="canaa">Canaã</a>
+            <a class="menu-item" href="#" data-cidade="itacare">Itacaré</a>
+            <a class="menu-item" href="#" data-cidade="canavieiras">Canavieiras</a>
+          </div>
+        </div>
+      </div>
 
       <div class="topo-centro">
         <div>

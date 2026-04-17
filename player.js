@@ -42,7 +42,7 @@ function mostrarMensagem(texto, detalhe = "") {
 
 function descricaoTempo(codigo) {
   const mapa = {
-    0: "Céu limpo",
+    0: "Ceu limpo",
     1: "Poucas nuvens",
     2: "Parcialmente nublado",
     3: "Nublado",
@@ -98,11 +98,11 @@ async function carregarPrevisaoTempo() {
       `;
     }).join("");
   } catch (error) {
-    console.error("Erro ao carregar previsão:", error);
+    console.error("Erro ao carregar previsao:", error);
 
     const descEl = document.getElementById("weatherDesc");
     if (descEl) {
-      descEl.textContent = "Previsão indisponível";
+      descEl.textContent = "Previsao indisponivel";
     }
   }
 }
@@ -357,8 +357,13 @@ function preCarregarProximos(quantidade = 2) {
   }
 }
 
+function removerClickDeDesbloqueio() {
+  document.body.onclick = null;
+}
+
 function proximo() {
   limparTimeout();
+  removerClickDeDesbloqueio();
 
   if (!playlistAtual.length) {
     mostrarMensagem("Sem conteudo para reproduzir.");
@@ -370,12 +375,11 @@ function proximo() {
 }
 
 function tocarImagem(item) {
-  const imgCache = cacheMidia.get(item.url);
-
   renderizarNoPlayer(`<div class="player-container" id="playerContainer"></div>`);
 
   const container = document.getElementById("playerContainer");
-  const img = imgCache instanceof HTMLImageElement ? imgCache : new Image();
+  const imgCache = cacheMidia.get(item.url);
+  const img = imgCache instanceof HTMLImageElement ? imgCache.cloneNode(true) : new Image();
 
   img.alt = "";
   img.style.width = "100%";
@@ -398,16 +402,16 @@ function tocarImagem(item) {
 }
 
 function tocarVideo(item) {
-  const videoCache = cacheMidia.get(item.url);
-
   renderizarNoPlayer(`<div class="player-container" id="playerContainer"></div>`);
 
   const container = document.getElementById("playerContainer");
-  const video = videoCache instanceof HTMLVideoElement ? videoCache : document.createElement("video");
+  const videoCache = cacheMidia.get(item.url);
+  const video = videoCache instanceof HTMLVideoElement ? videoCache.cloneNode(true) : document.createElement("video");
 
   video.id = "videoPlayer";
   video.autoplay = true;
-  video.muted = true;
+  video.muted = false;
+  video.volume = 1;
   video.playsInline = true;
   video.controls = false;
   video.preload = "auto";
@@ -418,15 +422,24 @@ function tocarVideo(item) {
 
   if (!video.src) video.src = item.url;
 
-  video.onloadeddata = () => {
-    video.play().catch(error => {
-      console.error("Erro ao dar play:", error);
-      mostrarMensagem("Clique/toque na tela para iniciar.", item.nome);
+  video.onloadeddata = async () => {
+    try {
+      await video.play();
+    } catch (error) {
+      console.error("Erro ao dar play com audio:", error);
+      mostrarMensagem("Clique/toque na tela para iniciar o audio.", item.nome);
 
-      document.body.onclick = () => {
-        video.play();
+      document.body.onclick = async () => {
+        try {
+          video.muted = false;
+          video.volume = 1;
+          await video.play();
+          removerClickDeDesbloqueio();
+        } catch (erroClique) {
+          console.error("Erro ao iniciar apos clique:", erroClique);
+        }
       };
-    });
+    }
   };
 
   video.onended = proximo;
@@ -452,6 +465,8 @@ function tocarVideo(item) {
 }
 
 function tocarSite(item) {
+  removerClickDeDesbloqueio();
+
   const url = normalizarUrlSite(item.url);
 
   if (!url) {
@@ -477,6 +492,7 @@ function tocarSite(item) {
 
 function tocarMidia() {
   limparTimeout();
+  removerClickDeDesbloqueio();
 
   if (!playlistAtual.length) {
     mostrarMensagem("Sem conteudo para reproduzir.");

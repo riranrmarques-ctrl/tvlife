@@ -16,6 +16,161 @@
       overflow: hidden;
     }
 
+    .layout-player {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      background: #000;
+    }
+
+    .weather-sidebar {
+      position: relative;
+      background:
+        linear-gradient(180deg, rgba(7, 17, 31, 0.96) 0%, rgba(8, 24, 43, 0.98) 52%, rgba(4, 11, 22, 1) 100%);
+      color: #ffffff;
+      font-family: Arial, Helvetica, sans-serif;
+      padding: 22px 20px;
+      box-sizing: border-box;
+      border-right: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .weather-sidebar::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(47, 111, 237, 0.28), transparent 34%),
+        radial-gradient(circle at 90% 18%, rgba(31, 169, 113, 0.18), transparent 30%);
+      pointer-events: none;
+    }
+
+    .weather-content,
+    .weather-footer {
+      position: relative;
+      z-index: 1;
+    }
+
+    .weather-logo-box {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .weather-logo {
+      width: 150px;
+      max-height: 86px;
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 14px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+    }
+
+    .weather-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #93c5fd;
+      margin-bottom: 8px;
+    }
+
+    .weather-city {
+      font-size: 28px;
+      line-height: 1;
+      font-weight: 900;
+      color: #ffffff;
+    }
+
+    .weather-state {
+      margin-top: 5px;
+      font-size: 13px;
+      color: #cbd5e1;
+      font-weight: 700;
+    }
+
+    .weather-now {
+      margin-top: 24px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .weather-temp {
+      font-size: 58px;
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -1px;
+      color: #ffffff;
+    }
+
+    .weather-desc {
+      margin-top: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #dbeafe;
+    }
+
+    .weather-days {
+      display: grid;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .weather-day {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 38px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      font-size: 14px;
+      color: #e5e7eb;
+      box-sizing: border-box;
+    }
+
+    .weather-day span {
+      text-transform: capitalize;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .weather-day strong {
+      white-space: nowrap;
+      color: #bfdbfe;
+      font-size: 14px;
+    }
+
+    .weather-footer {
+      display: grid;
+      gap: 5px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .weather-footer strong {
+      color: #e2e8f0;
+      font-size: 12px;
+    }
+
+    .player-main {
+      width: 100%;
+      height: 100vh;
+      background: #000;
+      overflow: hidden;
+    }
+
     .player-container {
       width: 100%;
       height: 100%;
@@ -27,7 +182,10 @@
 
     video,
     img,
-    iframe {
+    iframe,
+    .player-main video,
+    .player-main img,
+    .player-main iframe {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -51,87 +209,6 @@
       font-size: 15px;
     }
 
-    .layout-player {
-      width: 100vw;
-      height: 100vh;
-      display: grid;
-      grid-template-columns: 220px 1fr;
-      background: #000;
-    }
-
-    .weather-sidebar {
-      background: #07111f;
-      color: #ffffff;
-      font-family: Arial, Helvetica, sans-serif;
-      padding: 22px 18px;
-      box-sizing: border-box;
-      border-right: 1px solid rgba(255, 255, 255, 0.12);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .weather-city {
-      font-size: 20px;
-      font-weight: 800;
-    }
-
-    .weather-now {
-      margin-top: 18px;
-    }
-
-    .weather-temp {
-      font-size: 46px;
-      font-weight: 800;
-      line-height: 1;
-    }
-
-    .weather-desc {
-      margin-top: 8px;
-      font-size: 15px;
-      color: #cbd5e1;
-    }
-
-    .weather-days {
-      display: grid;
-      gap: 10px;
-      margin-top: 22px;
-    }
-
-    .weather-day {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      font-size: 14px;
-      color: #e5e7eb;
-    }
-
-    .weather-day strong {
-      white-space: nowrap;
-    }
-
-    .weather-footer {
-      font-size: 11px;
-      color: #94a3b8;
-    }
-
-    .player-main {
-      width: 100%;
-      height: 100vh;
-      background: #000;
-      overflow: hidden;
-    }
-
-    .player-main video,
-    .player-main img,
-    .player-main iframe {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      background: #000;
-      border: 0;
-    }
-
     @media (max-width: 900px) {
       .layout-player {
         grid-template-columns: 1fr;
@@ -147,8 +224,14 @@
 
   <div class="layout-player">
     <aside class="weather-sidebar" id="weatherSidebar">
-      <div>
+      <div class="weather-content">
+        <div class="weather-logo-box">
+          <img class="weather-logo" src="logoibicui.png" alt="Prefeitura de Ibicuí">
+        </div>
+
+        <div class="weather-label">Previsão do tempo</div>
         <div class="weather-city">Ibicuí</div>
+        <div class="weather-state">Bahia</div>
 
         <div class="weather-now">
           <div class="weather-temp" id="weatherTemp">--°</div>
@@ -158,7 +241,10 @@
         <div class="weather-days" id="weatherDays"></div>
       </div>
 
-      <div class="weather-footer">Previsão do tempo</div>
+      <div class="weather-footer">
+        <strong>Atualização automática</strong>
+        <span>Dados meteorológicos locais</span>
+      </div>
     </aside>
 
     <main class="player-main" id="playerMain">
@@ -172,7 +258,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="player.js?v=18"></script>
+  <script src="player.js?v=17"></script>
 
 </body>
 </html>

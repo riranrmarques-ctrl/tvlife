@@ -8,6 +8,10 @@ const DURACAO_IMAGEM = 20000;
 const DURACAO_SITE = 10000;
 const INTERVALO_PING = 60000;
 const INTERVALO_ATUALIZAR_PLAYLIST = 30000;
+const INTERVALO_ATUALIZAR_CLIMA = 30 * 60 * 1000;
+
+const WEATHER_LAT = -14.84167;
+const WEATHER_LON = -39.98667;
 
 let supabaseClient = null;
 let codigoAtual = null;
@@ -15,17 +19,92 @@ let playlistAtual = [];
 let indiceAtual = 0;
 let timeoutMidia = null;
 let cacheMidia = new Map();
-let primeiraBuscaFinalizada = false;
+
+function obterPlayerMain() {
+  return document.getElementById("playerMain") || document.body;
+}
+
+function renderizarNoPlayer(conteudo) {
+  const playerMain = obterPlayerMain();
+  playerMain.innerHTML = conteudo;
+}
 
 function mostrarMensagem(texto, detalhe = "") {
-  document.body.innerHTML = `
+  renderizarNoPlayer(`
     <div class="player-container">
       <div class="mensagem">
         ${texto}
         ${detalhe ? `<small>${detalhe}</small>` : ""}
       </div>
     </div>
-  `;
+  `);
+}
+
+function descricaoTempo(codigo) {
+  const mapa = {
+    0: "Céu limpo",
+    1: "Poucas nuvens",
+    2: "Parcialmente nublado",
+    3: "Nublado",
+    45: "Neblina",
+    48: "Neblina",
+    51: "Garoa leve",
+    53: "Garoa",
+    55: "Garoa forte",
+    61: "Chuva leve",
+    63: "Chuva",
+    65: "Chuva forte",
+    80: "Pancadas leves",
+    81: "Pancadas de chuva",
+    82: "Pancadas fortes",
+    95: "Trovoadas"
+  };
+
+  return mapa[codigo] || "Tempo local";
+}
+
+async function carregarPrevisaoTempo() {
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=America%2FSao_Paulo&forecast_days=4`;
+
+    const resposta = await fetch(url, { cache: "no-store" });
+
+    if (!resposta.ok) {
+      throw new Error(`Erro clima: ${resposta.status}`);
+    }
+
+    const dados = await resposta.json();
+
+    const tempEl = document.getElementById("weatherTemp");
+    const descEl = document.getElementById("weatherDesc");
+    const daysEl = document.getElementById("weatherDays");
+
+    if (!tempEl || !descEl || !daysEl) return;
+
+    tempEl.textContent = `${Math.round(dados.current.temperature_2m)}°`;
+    descEl.textContent = descricaoTempo(dados.current.weather_code);
+
+    daysEl.innerHTML = dados.daily.time.map((dia, index) => {
+      const data = new Date(`${dia}T12:00:00`);
+      const nomeDia = data.toLocaleDateString("pt-BR", { weekday: "short" });
+      const max = Math.round(dados.daily.temperature_2m_max[index]);
+      const min = Math.round(dados.daily.temperature_2m_min[index]);
+
+      return `
+        <div class="weather-day">
+          <span>${nomeDia}</span>
+          <strong>${max}° / ${min}°</strong>
+        </div>
+      `;
+    }).join("");
+  } catch (error) {
+    console.error("Erro ao carregar previsão:", error);
+
+    const descEl = document.getElementById("weatherDesc");
+    if (descEl) {
+      descEl.textContent = "Previsão indisponível";
+    }
+  }
 }
 
 function criarSupabaseClient() {
@@ -225,8 +304,6 @@ async function buscarPlaylist({ silencioso = false } = {}) {
     indiceAtual = 0;
   }
 
-  primeiraBuscaFinalizada = true;
-
   if (assinaturaAntiga !== assinaturaNova) {
     limparCacheObsoleto();
     preCarregarProximos(2);
@@ -268,21 +345,6 @@ function preCarregarItem(item) {
     video.src = item.url;
     video.load();
     cacheMidia.set(item.url, video);
-    return;
-  }
-
-  if (item.tipo === "site") {
-    const iframe = document.createElement("iframe");
-    iframe.src = normalizarUrlSite(item.url);
-    iframe.style.position = "absolute";
-    iframe.style.width = "1px";
-    iframe.style.height = "1px";
-    iframe.style.opacity = "0";
-    iframe.style.pointerEvents = "none";
-    iframe.style.left = "-9999px";
-    iframe.style.top = "-9999px";
-    document.body.appendChild(iframe);
-    cacheMidia.set(item.url, iframe);
   }
 }
 
@@ -310,16 +372,14 @@ function proximo() {
 function tocarImagem(item) {
   const imgCache = cacheMidia.get(item.url);
 
-  document.body.innerHTML = `
-    <div class="player-container" id="playerContainer"></div>
-  `;
+  renderizarNoPlayer(`<div class="player-container" id="playerContainer"></div>`);
 
   const container = document.getElementById("playerContainer");
   const img = imgCache instanceof HTMLImageElement ? imgCache : new Image();
 
   img.alt = "";
-  img.style.width = "100vw";
-  img.style.height = "100vh";
+  img.style.width = "100%";
+  img.style.height = "100%";
   img.style.objectFit = "cover";
   img.style.background = "#000";
 
@@ -340,9 +400,7 @@ function tocarImagem(item) {
 function tocarVideo(item) {
   const videoCache = cacheMidia.get(item.url);
 
-  document.body.innerHTML = `
-    <div class="player-container" id="playerContainer"></div>
-  `;
+  renderizarNoPlayer(`<div class="player-container" id="playerContainer"></div>`);
 
   const container = document.getElementById("playerContainer");
   const video = videoCache instanceof HTMLVideoElement ? videoCache : document.createElement("video");
@@ -353,8 +411,8 @@ function tocarVideo(item) {
   video.playsInline = true;
   video.controls = false;
   video.preload = "auto";
-  video.style.width = "100vw";
-  video.style.height = "100vh";
+  video.style.width = "100%";
+  video.style.height = "100%";
   video.style.objectFit = "cover";
   video.style.background = "#000";
 
@@ -402,27 +460,16 @@ function tocarSite(item) {
     return;
   }
 
-  const iframeCache = cacheMidia.get(item.url);
-
-  document.body.innerHTML = `
-    <div class="player-container" id="playerContainer"></div>
-  `;
-
-  const container = document.getElementById("playerContainer");
-  const iframe = iframeCache instanceof HTMLIFrameElement ? iframeCache : document.createElement("iframe");
-
-  iframe.src = url;
-  iframe.allow = "autoplay; fullscreen";
-  iframe.referrerPolicy = "no-referrer-when-downgrade";
-  iframe.style.width = "100vw";
-  iframe.style.height = "100vh";
-  iframe.style.border = "0";
-  iframe.style.background = "#000";
-  iframe.style.position = "static";
-  iframe.style.opacity = "1";
-  iframe.style.pointerEvents = "auto";
-
-  container.appendChild(iframe);
+  renderizarNoPlayer(`
+    <div class="player-container">
+      <iframe
+        src="${url}"
+        allow="autoplay; fullscreen"
+        referrerpolicy="no-referrer-when-downgrade"
+        style="width:100%;height:100%;border:0;background:#000;"
+      ></iframe>
+    </div>
+  `);
 
   preCarregarProximos(2);
   timeoutMidia = setTimeout(proximo, DURACAO_SITE);
@@ -462,6 +509,9 @@ function tocarMidia() {
 
 async function iniciar() {
   try {
+    await carregarPrevisaoTempo();
+    setInterval(carregarPrevisaoTempo, INTERVALO_ATUALIZAR_CLIMA);
+
     mostrarMensagem("Iniciando player...");
 
     if (!criarSupabaseClient()) return;

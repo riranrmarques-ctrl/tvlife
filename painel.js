@@ -110,7 +110,7 @@ function calcularStatusInfo(ponto) {
   const diff = Date.now() - dataPing.getTime();
   const hora = formatarHoraPing(ponto.ultimo_ping);
 
-  if (diff < 5 * 60 * 1000) {
+  if (diff < 15 * 60 * 1000) {
     return {
       texto: "Ativo",
       textoCompleto: `Ativo desde ${hora}`,
@@ -314,7 +314,7 @@ function renderizarCardsPontos(lista) {
     if (cidadeEl) cidadeEl.innerHTML = obterCidadeComNomeEmNegrito(ponto.cidade);
 
     if (statusElCard) {
-      statusElCard.textContent = statusInfo.textoCompleto || statusInfo.texto;
+      statusElCard.textContent = statusInfo.texto;
       statusElCard.classList.toggle("ativo", statusInfo.ativo);
       statusElCard.classList.toggle("inativo", !statusInfo.ativo);
     }

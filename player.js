@@ -42,7 +42,7 @@ function mostrarMensagem(texto, detalhe = "") {
 
 function descricaoTempo(codigo) {
   const mapa = {
-    0: "Ceu limpo",
+    0: "Céu limpo",
     1: "Poucas nuvens",
     2: "Parcialmente nublado",
     3: "Nublado",
@@ -98,11 +98,11 @@ async function carregarPrevisaoTempo() {
       `;
     }).join("");
   } catch (error) {
-    console.error("Erro ao carregar previsao:", error);
+    console.error("Erro ao carregar previsão:", error);
 
     const descEl = document.getElementById("weatherDesc");
     if (descEl) {
-      descEl.textContent = "Previsao indisponivel";
+      descEl.textContent = "Previsão indisponível";
     }
   }
 }
@@ -370,11 +370,12 @@ function proximo() {
 }
 
 function tocarImagem(item) {
+  const imgCache = cacheMidia.get(item.url);
+
   renderizarNoPlayer(`<div class="player-container" id="playerContainer"></div>`);
 
   const container = document.getElementById("playerContainer");
-  const imgCache = cacheMidia.get(item.url);
-  const img = imgCache instanceof HTMLImageElement ? imgCache.cloneNode(true) : new Image();
+  const img = imgCache instanceof HTMLImageElement ? imgCache : new Image();
 
   img.alt = "";
   img.style.width = "100%";
@@ -397,16 +398,16 @@ function tocarImagem(item) {
 }
 
 function tocarVideo(item) {
+  const videoCache = cacheMidia.get(item.url);
+
   renderizarNoPlayer(`<div class="player-container" id="playerContainer"></div>`);
 
   const container = document.getElementById("playerContainer");
-  const videoCache = cacheMidia.get(item.url);
-  const video = videoCache instanceof HTMLVideoElement ? videoCache.cloneNode(true) : document.createElement("video");
+  const video = videoCache instanceof HTMLVideoElement ? videoCache : document.createElement("video");
 
   video.id = "videoPlayer";
   video.autoplay = true;
-  video.muted = false;
-  video.volume = 1;
+  video.muted = true;
   video.playsInline = true;
   video.controls = false;
   video.preload = "auto";
@@ -417,21 +418,15 @@ function tocarVideo(item) {
 
   if (!video.src) video.src = item.url;
 
-  video.onloadeddata = async () => {
-    try {
-      await video.play();
-    } catch (error) {
-      console.error("Autoplay com audio bloqueado:", error);
+  video.onloadeddata = () => {
+    video.play().catch(error => {
+      console.error("Erro ao dar play:", error);
+      mostrarMensagem("Clique/toque na tela para iniciar.", item.nome);
 
-      video.muted = true;
-
-      try {
-        await video.play();
-      } catch (erroMutado) {
-        console.error("Erro ao iniciar video:", erroMutado);
-        timeoutMidia = setTimeout(proximo, 3000);
-      }
-    }
+      document.body.onclick = () => {
+        video.play();
+      };
+    });
   };
 
   video.onended = proximo;

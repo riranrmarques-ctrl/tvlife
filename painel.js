@@ -73,23 +73,58 @@ function obterCidadeComNomeEmNegrito(cidade) {
   return nome ? `Cidade de <strong>${escapeHtml(nome)}</strong>` : "Cidade não definida";
 }
 
+function formatarHoraPing(valor) {
+  const data = new Date(valor);
+
+  if (Number.isNaN(data.getTime())) {
+    return "sem registro";
+  }
+
+  return data.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
 function calcularStatusInfo(ponto) {
   if (!ponto?.ultimo_ping) {
-    return { texto: "Inativo", ativo: false, classe: "inativo" };
+    return {
+      texto: "Inativo",
+      textoCompleto: "Inativo desde sem registro",
+      ativo: false,
+      classe: "inativo"
+    };
   }
 
   const dataPing = new Date(ponto.ultimo_ping);
+
   if (Number.isNaN(dataPing.getTime())) {
-    return { texto: "Inativo", ativo: false, classe: "inativo" };
+    return {
+      texto: "Inativo",
+      textoCompleto: "Inativo desde sem registro",
+      ativo: false,
+      classe: "inativo"
+    };
   }
 
   const diff = Date.now() - dataPing.getTime();
+  const hora = formatarHoraPing(ponto.ultimo_ping);
 
   if (diff < 5 * 60 * 1000) {
-    return { texto: "Ativo", ativo: true, classe: "ativo" };
+    return {
+      texto: "Ativo",
+      textoCompleto: `Ativo desde ${hora}`,
+      ativo: true,
+      classe: "ativo"
+    };
   }
 
-  return { texto: "Inativo", ativo: false, classe: "inativo" };
+  return {
+    texto: "Inativo",
+    textoCompleto: `Inativo desde ${hora}`,
+    ativo: false,
+    classe: "inativo"
+  };
 }
 
 function obterNomeItem(item) {
@@ -279,7 +314,7 @@ function renderizarCardsPontos(lista) {
     if (cidadeEl) cidadeEl.innerHTML = obterCidadeComNomeEmNegrito(ponto.cidade);
 
     if (statusElCard) {
-      statusElCard.textContent = statusInfo.texto;
+      statusElCard.textContent = statusInfo.textoCompleto || statusInfo.texto;
       statusElCard.classList.toggle("ativo", statusInfo.ativo);
       statusElCard.classList.toggle("inativo", !statusInfo.ativo);
     }
@@ -316,7 +351,7 @@ function abrirPonto(codigo) {
   if (enderecoPonto) enderecoPonto.textContent = ponto.endereco || "Endereço não definido";
 
   if (statusPonto) {
-    statusPonto.textContent = statusInfo.texto;
+    statusPonto.textContent = statusInfo.textoCompleto || statusInfo.texto;
     statusPonto.classList.remove("ativo", "inativo");
     statusPonto.classList.add(statusInfo.classe);
   }
@@ -370,6 +405,7 @@ function montarAcoesPlaylist(item) {
   return `
     <div class="playlist-item-acoes-laterais">
       ${abrir}
+      <button class="playlist-acao btn-renomear-item" type="button" data-id="${item.id}" data-nome="${escapeHtml(obterNomeItem(item))}" title="Renomear">✎</button>
       <button class="playlist-acao btn-excluir-item" type="button" data-id="${item.id}" title="Excluir">🗑</button>
     </div>
   `;
@@ -419,6 +455,7 @@ async function carregarPlaylist() {
 
   ativarDrag(ativos);
   ativarExclusaoItens();
+  ativarRenomearItens();
 }
 
 function ativarExclusaoItens() {
@@ -454,6 +491,44 @@ function ativarExclusaoItens() {
       }
 
       setStatus("Item excluído", "ok");
+      carregarPlaylist();
+    };
+  });
+}
+
+function ativarRenomearItens() {
+  document.querySelectorAll(".btn-renomear-item").forEach(btn => {
+    btn.onclick = async e => {
+      e.stopPropagation();
+
+      const id = btn.dataset.id;
+      const nomeAtual = btn.dataset.nome || "";
+
+      if (!id) return;
+
+      const novoNome = window.prompt("Novo nome do arquivo:", nomeAtual);
+
+      if (novoNome === null) return;
+
+      const nomeFinal = novoNome.trim();
+
+      if (!nomeFinal) {
+        setStatus("Nome inválido", "erro");
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from(TABELA)
+        .update({ nome: nomeFinal })
+        .eq("id", id);
+
+      if (error) {
+        console.error(error);
+        setStatus("Erro ao renomear item", "erro");
+        return;
+      }
+
+      setStatus("Item renomeado", "ok");
       carregarPlaylist();
     };
   });

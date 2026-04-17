@@ -357,13 +357,8 @@ function preCarregarProximos(quantidade = 2) {
   }
 }
 
-function removerClickDeDesbloqueio() {
-  document.body.onclick = null;
-}
-
 function proximo() {
   limparTimeout();
-  removerClickDeDesbloqueio();
 
   if (!playlistAtual.length) {
     mostrarMensagem("Sem conteudo para reproduzir.");
@@ -426,19 +421,16 @@ function tocarVideo(item) {
     try {
       await video.play();
     } catch (error) {
-      console.error("Erro ao dar play com audio:", error);
-      mostrarMensagem("Clique/toque na tela para iniciar o audio.", item.nome);
+      console.error("Autoplay com audio bloqueado:", error);
 
-      document.body.onclick = async () => {
-        try {
-          video.muted = false;
-          video.volume = 1;
-          await video.play();
-          removerClickDeDesbloqueio();
-        } catch (erroClique) {
-          console.error("Erro ao iniciar apos clique:", erroClique);
-        }
-      };
+      video.muted = true;
+
+      try {
+        await video.play();
+      } catch (erroMutado) {
+        console.error("Erro ao iniciar video:", erroMutado);
+        timeoutMidia = setTimeout(proximo, 3000);
+      }
     }
   };
 
@@ -465,8 +457,6 @@ function tocarVideo(item) {
 }
 
 function tocarSite(item) {
-  removerClickDeDesbloqueio();
-
   const url = normalizarUrlSite(item.url);
 
   if (!url) {
@@ -492,7 +482,6 @@ function tocarSite(item) {
 
 function tocarMidia() {
   limparTimeout();
-  removerClickDeDesbloqueio();
 
   if (!playlistAtual.length) {
     mostrarMensagem("Sem conteudo para reproduzir.");

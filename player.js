@@ -403,7 +403,7 @@ function tocarVideo(item) {
   renderizarNoPlayer(`<div class="player-container" id="playerContainer"></div>`);
 
   const container = document.getElementById("playerContainer");
-  const video = videoCache instanceof HTMLVideoElement ? videoCache : document.createElement("video");
+  const video = videoCache instanceof HTMLVideoElement ? videoCache.cloneNode(true) : document.createElement("video");
 
   video.id = "videoPlayer";
   video.autoplay = true;
@@ -418,22 +418,19 @@ function tocarVideo(item) {
 
   if (!video.src) video.src = item.url;
 
-  video.onloadeddata = () => {
-    video.play().catch(error => {
-      console.error("Erro ao dar play:", error);
-      mostrarMensagem("Clique/toque na tela para iniciar.", item.nome);
-
-      document.body.onclick = () => {
-        video.play();
-      };
-    });
+  video.onloadeddata = async () => {
+    try {
+      await video.play();
+    } catch (error) {
+      console.error("Erro ao iniciar video:", error);
+      timeoutMidia = setTimeout(proximo, 3000);
+    }
   };
 
   video.onended = proximo;
 
   video.onerror = () => {
     console.error("Erro ao carregar video:", item.url);
-    mostrarMensagem("Erro ao carregar video.", item.nome);
     timeoutMidia = setTimeout(proximo, 3000);
   };
 
@@ -443,12 +440,9 @@ function tocarVideo(item) {
 
   timeoutMidia = setTimeout(() => {
     if (video.readyState === 0) {
-      mostrarMensagem("Video demorou para carregar.", "Pulando para o proximo item...");
-      setTimeout(proximo, 2000);
+      timeoutMidia = setTimeout(proximo, 2000);
     }
   }, 15000);
-
-  video.play().catch(() => {});
 }
 
 function tocarSite(item) {

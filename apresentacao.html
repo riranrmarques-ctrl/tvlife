@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Duna Branding | Apresentação</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #04070d;
+      --bg-2: #07111d;
+      --panel: rgba(10, 18, 31, 0.88);
+      --panel-2: rgba(12, 22, 38, 0.92);
+      --line: rgba(120, 162, 220, 0.14);
+      --line-strong: rgba(120, 162, 220, 0.28);
+      --text: #f4f8ff;
+      --muted: #94a8c6;
+      --accent: #5c95d6;
+      --accent-2: #7da8d8;
+      --accent-soft: rgba(92, 149, 214, 0.14);
+      --success: #39d27d;
+      --warn: #ffb84d;
+      --danger: #ff5f6d;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+      --container: 1260px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Inter", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(92, 149, 214, 0.12), transparent 28%),
+        radial-gradient(circle at top left, rgba(125, 168, 216, 0.06), transparent 22%),
+        linear-gradient(180deg, #03060b 0%, #050a12 32%, #04070d 100%);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    .container {
+      width: min(var(--container), calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(3, 7, 13, 0.72);
+      border-bottom: 1px solid rgba(130, 164, 214, 0.08);
+    }
+
+    .header-inner {
+      min-height: 84px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      position: relative;
+      background: linear-gradient(180deg, #7da8d8 0%, #4e87ca 100%);
+      box-shadow: 0 8px 20px rgba(92, 149, 214, 0.25);
+    }
+
+    .brand-mark::before {
+      content: "";
+      position: absolute;
+      inset: 9px 8px 9px 13px;
+      background: #08111b;
+      clip-path: polygon(0 0, 100% 50%, 0 100%);
+      border-radius: 6px;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 0.95;
+    }
+
+    .brand-text strong {
+      font-size: 1.8rem;
+      font-weight: 800;
+    }
+
+    .brand-text span {
+      font-size: 1rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 34px;
+      color: #dbe5f6;
+      font-weight: 500;
+    }
+
+    .nav a {
+      transition: 0.25s ease;
+    }
+
+    .nav a:hover {
+      color: var(--accent-2);
+    }
+
+    .header-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 52px;
+      padding: 0 24px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #6f9fd4 0%, #4d84c5 100%);
+      color: #f8fbff;
+      font-weight: 700;
+      box-shadow: 0 14px 28px rgba(76, 132, 197, 0.28);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .header-cta:hover,
+    .button-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 34px rgba(76, 132, 197, 0.32);
+    }
+
+    .hero {
+      padding: 64px 0 42px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    .hero-copy {
+      padding: 38px 4px 20px 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(92, 149, 214, 0.08);
+      color: var(--accent-2);
+      border: 1px solid rgba(125, 168, 216, 0.18);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 22px;
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 6vw, 5.4rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+      max-width: 740px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 .accent {
+      color: #74a6de;
+    }
+
+    .hero p {
+      max-width: 620px;
+      font-size: 1.18rem;
+      line-height: 1.75;
+      color: var(--muted);
+      margin-bottom: 30px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 34px;
+    }
+
+    .button-primary,
+    .button-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      min-height: 58px;
+      padding: 0 24px;
+      border-radius: 999px;
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+
+    .button-primary {
+      color: white;
+      background: linear-gradient(180deg, #6c9fd8 0%, #4d84c5 100%);
+      box-shadow: 0 16px 30px rgba(76, 132, 197, 0.22);
+    }
+
+    .button-secondary {
+      border: 1px solid rgba(140, 174, 218, 0.22);
+      color: #ecf3ff;
+      background: rgba(10, 16, 27, 0.66);
+    }
+
+    .button-secondary:hover {
+      border-color: rgba(140, 174, 218, 0.38);
+      background: rgba(13, 21, 35, 0.92);
+      transform: translateY(-2px);
+    }
+
+    .hero-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .mini-feature {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      min-width: 180px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(9, 16, 28, 0.7);
+      border: 1px solid rgba(130, 164, 214, 0.08);
+    }
+
+    .mini-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: rgba(92, 149, 214, 0.1);
+      display: grid;
+      place-items: center;
+      color: var(--accent-2);
+      flex: 0 0 auto;
+    }
+
+    .mini-feature strong {
+      display: block;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+
+    .mini-feature span {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .hero-visual {
+      position: relative;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      border: 1px solid rgba(135, 170, 217, 0.14);
+      background:
+        linear-gradient(180deg, rgba(4, 8, 14, 0.35), rgba(4, 8, 14, 0.82)),
+        url('https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=1600&q=80') center/cover;
+      min-height: 720px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-screen {
+      position: absolute;
+      right: 30px;
+      top: 42px;
+      width: min(90%, 430px);
+      background: linear-gradient(180deg, #1a2433 0%, #0b111b 100%);
+      border: 2px solid rgba(117, 163, 219, 0.48);
+      border-radius: 26px;
+      box-shadow:
+        0 0 0 1px rgba(117, 163, 219, 0.1),
+        0 0 34px rgba(117, 163, 219, 0.22),
+        0 30px 80px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+    }
+
+    .screen-glow {
+      position: absolute;
+      inset: auto 30px 26px auto;
+      width: 430px;
+      height: 140px;
+      background: radial-gradient(circle, rgba(117, 163, 219, 0.26) 0%, transparent 68%);
+      filter: blur(30px);
+      pointer-events: none;
+    }
+
+    .screen-body {
+      aspect-ratio: 1.03;
+      background:
+        linear-gradient(180deg, rgba(5, 9, 15, 0.26), rgba(5, 9, 15, 0.54)),
+        url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80') center/cover;
+      padding: 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .screen-body small {
+      align-self: flex-end;
+      font-size: 1.55rem;
+      font-weight: 800;
+      line-height: 0.95;
+      text-align: right;
+    }
+
+    .screen-body h2 {
+      font-size: clamp(2.6rem, 5vw, 4.3rem);
+      line-height: 0.92;
+      letter-spacing: -0.06em;
+      max-width: 280px;
+      text-transform: uppercase;
+    }
+
+    .screen-body h2 span {
+      color: #77aae0;
+    }
+
+    .realtime-card {
+      position: absolute;
+      right: 18px;
+      bottom: 20px;
+      left: 18px;
+      border-radius: 22px;
+      background: rgba(6, 12, 21, 0.82);
+      border: 1px solid rgba(137, 171, 218, 0.14);
+      padding: 18px;
+      backdrop-filter: blur(16px);
+    }
+
+    .realtime-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .realtime-head strong {
+      font-size: 1.15rem;
+    }
+
+    .live-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #74e295;
+      font-size: 0.95rem;
+    }
+
+    .live-dot::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #4fe882;
+      box-shadow: 0 0 0 0 rgba(79, 232, 130, 0.7);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(79, 232, 130, 0.65); }
+      70% { box-shadow: 0 0 0 12px rgba(79, 232, 130, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(79, 232, 130, 0); }
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .metric {
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(154, 184, 228, 0.08);
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      margin-bottom: 6px;
+    }
+
+    .metric-label {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .metric-trend {
+      color: #58df8c;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    section {
+      padding: 48px 0;
+    }
+
+    .section-head {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .section-head .overline {
+      color: var(--accent-2);
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+      font-size: 0.76rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .section-head h3 {
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+      margin-bottom: 10px;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .how-wrap {
+      border: 1px solid rgba(132, 168, 220, 0.1);
+      background: linear-gradient(180deg, rgba(7, 12, 20, 0.78), rgba(5, 10, 16, 0.9));
+      border-radius: 30px;
+      padding: 30px 24px 24px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: var(--shadow);
+    }
+
+    .how-topline {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .how-badge {
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: rgba(92, 149, 214, 0.08);
+      border: 1px solid rgba(125, 168, 216, 0.14);
+      color: #9fc0e5;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .how-flow {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-top: 26px;
+    }
+
+    .flow-line {
+      position: absolute;
+      top: 50%;
+      left: 12%;
+      width: 76%;
+      height: 4px;
+      transform: translateY(-50%);
+      background: linear-gradient(90deg, rgba(125, 168, 216, 0.06), rgba(125, 168, 216, 0.2), rgba(125, 168, 216, 0.06));
+      border-radius: 999px;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .flow-line::after {
+      content: "";
+      position: absolute;
+      left: -12%;
+      top: 0;
+      width: 12%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, #9cc1ec, transparent);
+      filter: blur(1px);
+      animation: travel 3.8s linear infinite;
+    }
+
+    @keyframes travel {
+      from { left: -12%; }
+      to { left: 102%; }
+    }
+
+    .flow-card {
+      position: relative;
+      z-index: 1;
+      min-height: 280px;
+      padding: 24px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(11, 19, 32, 0.96), rgba(8, 14, 24, 0.98));
+      border: 1px solid rgba(131, 168, 222, 0.12);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.26);
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      overflow: hidden;
+    }
+
+    .flow-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(140, 184, 234, 0.24);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(140, 184, 234, 0.08);
+    }
+
+    .flow-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -20% -50% auto;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(92, 149, 214, 0.16), transparent 70%);
+      pointer-events: none;
+    }
+
+    .step-pill {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #6f9fd4 0%, #4d84c5 100%);
+      color: white;
+      font-weight: 800;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 22px rgba(76, 132, 197, 0.24);
+    }
+
+    .step-icon {
+      width: 74px;
+      height: 74px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      background: rgba(92, 149, 214, 0.08);
+      border: 1px solid rgba(137, 171, 218, 0.14);
+      color: #84b2e5;
+    }
+
+    .step-title {
+      font-size: 1.24rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+
+    .step-desc {
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 18px;
+      min-height: 76px;
+    }
+
+    .step-metric {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .step-metric strong {
+      font-size: 2rem;
+      letter-spacing: -0.05em;
+    }
+
+    .step-metric span {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .step-foot {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #b9c9dd;
+      font-size: 0.92rem;
+    }
+
+    .status-mini {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #72de94;
+      box-shadow: 0 0 0 0 rgba(114, 222, 148, 0.55);
+      animation: pulse 1.8s infinite;
+    }
+
+    .upload-orbit,
+    .program-bars,
+    .screen-wave,
+    .chart-anim {
+      position: relative;
+      width: 42px;
+      height: 42px;
+    }
+
+    .upload-orbit::before,
+    .upload-orbit::after {
+      content: "";
+      position: absolute;
+      border: 2px solid rgba(132, 178, 229, 0.42);
+      border-radius: 50%;
+      inset: 5px;
+      animation: orbit 2.6s linear infinite;
+    }
+
+    .upload-orbit::after {
+      inset: 0;
+      opacity: 0.4;
+      animation-direction: reverse;
+      animation-duration: 3.4s;
+    }
+
+    @keyframes orbit {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .program-bars span,
+    .chart-anim span {
+      position: absolute;
+      bottom: 0;
+      width: 7px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #94bde9 0%, #5b91cf 100%);
+      animation: bounce 1.6s ease-in-out infinite;
+    }
+
+    .program-bars span:nth-child(1), .chart-anim span:nth-child(1) { left: 2px; height: 18px; animation-delay: 0s; }
+    .program-bars span:nth-child(2), .chart-anim span:nth-child(2) { left: 13px; height: 28px; animation-delay: 0.15s; }
+    .program-bars span:nth-child(3), .chart-anim span:nth-child(3) { left: 24px; height: 14px; animation-delay: 0.3s; }
+    .program-bars span:nth-child(4), .chart-anim span:nth-child(4) { left: 35px; height: 24px; animation-delay: 0.45s; }
+
+    @keyframes bounce {
+      0%, 100% { transform: scaleY(0.7); opacity: 0.65; }
+      50% { transform: scaleY(1.12); opacity: 1; }
+    }
+
+    .screen-wave::before,
+    .screen-wave::after {
+      content: "";
+      position: absolute;
+      inset: 9px 4px 9px 4px;
+      border-radius: 14px;
+      border: 2px solid rgba(132, 178, 229, 0.42);
+    }
+
+    .screen-wave::after {
+      inset: 18px 10px 18px 10px;
+      border-top-color: transparent;
+      border-right-color: transparent;
+      animation: glowMove 1.8s ease-in-out infinite;
+    }
+
+    @keyframes glowMove {
+      0%, 100% { opacity: 0.35; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(-2px); }
+    }
+
+    .step-progress {
+      margin-top: 16px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .step-progress b {
+      display: block;
+      height: 100%;
+      width: var(--progress, 70%);
+      background: linear-gradient(90deg, #75a8df 0%, #4e84c6 100%);
+      border-radius: inherit;
+      animation: stretch 2.6s ease-in-out infinite alternate;
+    }
+
+    @keyframes stretch {
+      from { filter: brightness(0.94); }
+      to { filter: brightness(1.08); }
+    }
+
+    .locations-grid,
+    .diff-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .locations-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    .location-card {
+      background: linear-gradient(180deg, rgba(10, 17, 28, 0.94), rgba(7, 12, 21, 0.98));
+      border: 1px solid rgba(132, 168, 220, 0.1);
+      border-radius: 22px;
+      overflow: hidden;
+      transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+
+    .location-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(140, 184, 234, 0.22);
+    }
+
+    .location-card img {
+      height: 205px;
+      width: 100%;
+      object-fit: cover;
+    }
+
+    .location-body {
+      padding: 18px;
+    }
+
+    .location-body strong {
+      display: block;
+      font-size: 1.14rem;
+      margin-bottom: 8px;
+    }
+
+    .location-body p {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .results-wrap {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .phone-card,
+    .benefit-card,
+    .cta-band {
+      background: linear-gradient(180deg, rgba(10, 16, 27, 0.95), rgba(8, 13, 22, 0.98));
+      border: 1px solid rgba(132, 168, 220, 0.1);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .phone-card {
+      padding: 24px;
+      display: grid;
+      place-items: center;
+      min-height: 320px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .phone-card::before {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(92, 149, 214, 0.16), transparent 68%);
+      filter: blur(20px);
+    }
+
+    .phone {
+      width: 210px;
+      height: 410px;
+      border-radius: 36px;
+      padding: 12px;
+      background: linear-gradient(180deg, #162233 0%, #0a1018 100%);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.42);
+      transform: rotate(-11deg);
+      position: relative;
+      z-index: 1;
+    }
+
+    .phone-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 28px;
+      background: linear-gradient(180deg, #09111d 0%, #0b1625 100%);
+      padding: 22px 18px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(145, 181, 230, 0.12);
+    }
+
+    .phone-notch {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 88px;
+      height: 18px;
+      border-radius: 0 0 14px 14px;
+      background: #060b13;
+    }
+
+    .qr-box {
+      margin-top: 34px;
+      width: 100%;
+      aspect-ratio: 1;
+      background:
+        linear-gradient(45deg, #ffffff 25%, #0b1625 25%, #0b1625 50%, #ffffff 50%, #ffffff 75%, #0b1625 75%),
+        linear-gradient(45deg, #ffffff 25%, #0b1625 25%, #0b1625 50%, #ffffff 50%, #ffffff 75%, #0b1625 75%);
+      background-size: 28px 28px;
+      background-position: 0 0, 14px 14px;
+      border-radius: 18px;
+      border: 8px solid #fff;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.08);
+    }
+
+    .phone-label {
+      text-align: center;
+      margin-top: 16px;
+      color: #bfd1e6;
+      font-size: 0.9rem;
+    }
+
+    .diff-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .benefit-card {
+      padding: 24px;
+      min-height: 220px;
+    }
+
+    .benefit-icon {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: rgba(92, 149, 214, 0.08);
+      color: #91b8e6;
+      margin-bottom: 18px;
+      border: 1px solid rgba(137, 171, 218, 0.12);
+    }
+
+    .benefit-card h4 {
+      font-size: 1.16rem;
+      margin-bottom: 12px;
+      letter-spacing: -0.03em;
+    }
+
+    .benefit-card p {
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .cta-band {
+      margin-top: 22px;
+      padding: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .cta-band h4 {
+      font-size: clamp(1.8rem, 3vw, 3rem);
+      line-height: 1;
+      letter-spacing: -0.05em;
+      margin-bottom: 10px;
+    }
+
+    .cta-band p {
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 520px;
+    }
+
+    .cta-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .stat-chip {
+      border-radius: 18px;
+      padding: 16px 18px;
+      background: rgba(9, 16, 27, 0.84);
+      border: 1px solid rgba(132, 168, 220, 0.09);
+      text-align: center;
+    }
+
+    .stat-chip strong {
+      display: block;
+      font-size: 1.4rem;
+      margin-bottom: 6px;
+      letter-spacing: -0.05em;
+    }
+
+    .stat-chip span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 { transition-delay: 0.08s; }
+    .delay-2 { transition-delay: 0.16s; }
+    .delay-3 { transition-delay: 0.24s; }
+    .delay-4 { transition-delay: 0.32s; }
+    .delay-5 { transition-delay: 0.4s; }
+
+    svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @media (max-width: 1180px) {
+      .hero-grid,
+      .results-wrap,
+      .cta-band {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-visual {
+        min-height: 660px;
+      }
+
+      .locations-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .diff-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .how-flow {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .flow-line {
+        display: none;
+      }
+
+      .metric-grid,
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 860px) {
+      .nav {
+        display: none;
+      }
+
+      .header-inner {
+        min-height: 76px;
+      }
+
+      .hero {
+        padding-top: 34px;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.4rem, 10vw, 3.8rem);
+      }
+
+      .hero-copy {
+        padding-top: 8px;
+      }
+
+      .hero-visual {
+        min-height: 610px;
+      }
+
+      .hero-screen {
+        left: 18px;
+        right: 18px;
+        width: auto;
+      }
+
+      .screen-glow {
+        display: none;
+      }
+
+      .locations-grid,
+      .diff-grid,
+      .how-flow,
+      .metric-grid,
+      .stats-row {
+        grid-template-columns: 1fr;
+      }
+
+      .cta-band {
+        padding: 26px 22px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: min(var(--container), calc(100% - 24px));
+      }
+
+      .brand-text strong {
+        font-size: 1.35rem;
+      }
+
+      .brand-text span {
+        font-size: 0.78rem;
+      }
+
+      .header-cta {
+        padding: 0 16px;
+        height: 46px;
+        font-size: 0.92rem;
+      }
+
+      .hero p,
+      .section-head p {
+        font-size: 0.98rem;
+      }
+
+      .button-primary,
+      .button-secondary {
+        width: 100%;
+      }
+
+      .mini-feature {
+        width: 100%;
+      }
+
+      .hero-visual {
+        min-height: 560px;
+      }
+
+      .screen-body {
+        padding: 26px;
+      }
+
+      .screen-body h2 {
+        font-size: 2.2rem;
+      }
+
+      .realtime-card {
+        padding: 14px;
+      }
+
+      .flow-card,
+      .benefit-card,
+      .location-card {
+        border-radius: 20px;
+      }
+
+      .phone {
+        transform: none;
+        width: 190px;
+        height: 370px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="#inicio" class="brand">
+        <div class="brand-mark"></div>
+        <div class="brand-text">
+          <strong>DUNA</strong>
+          <span>BRANDING</span>
+        </div>
+      </a>
+
+      <nav class="nav">
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#pontos">Nossos pontos</a>
+        <a href="#vantagens">Vantagens</a>
+        <a href="#contato">Contato</a>
+      </nav>
+
+      <a href="#contato" class="header-cta">Solicitar proposta</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="container hero-grid">
+        <div class="hero-copy fade-up visible">
+          <div class="eyebrow">Mídia indoor inteligente</div>
+          <h1>Sua marca na frente de quem realmente <span class="accent">importa.</span></h1>
+          <p>
+            Anuncie em telas estrategicamente posicionadas em ambientes de alto fluxo e impacto.
+            Tecnologia, controle e resultados reais para campanhas que precisam de presença forte.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#contato" class="button-primary">
+              Quero anunciar
+              <svg viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="M13 5l7 7-7 7"></path></svg>
+            </a>
+            <a href="#como-funciona" class="button-secondary">
+              Ver como funciona
+              <svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"></path></svg>
+            </a>
+          </div>
+
+          <div class="hero-features">
+            <div class="mini-feature">
+              <div class="mini-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 5-3.5 8.5-7 9-3.5-.5-7-4-7-9V7l7-4z"></path><path d="M9.5 12.5l1.7 1.7 3.3-4"></path></svg>
+              </div>
+              <div>
+                <strong>Exibição garantida</strong>
+                <span>Monitoramento 24/7 da campanha.</span>
+              </div>
+            </div>
+
+            <div class="mini-feature">
+              <div class="mini-icon">
+                <svg viewBox="0 0 24 24"><path d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3z"></path><path d="M8 13c2.2 0 4-1.8 4-4S10.2 5 8 5 4 6.8 4 9s1.8 4 4 4z"></path><path d="M8 14c-3 0-5 1.5-5 4v1h10"></path><path d="M16 12c-2 0-3.7.8-4.6 2.2"></path><path d="M18 14c1.9.2 3 1.6 3 4v1h-4"></path></svg>
+              </div>
+              <div>
+                <strong>Ambientes premium</strong>
+                <span>Público qualificado e estratégico.</span>
+              </div>
+            </div>
+
+            <div class="mini-feature">
+              <div class="mini-icon">
+                <svg viewBox="0 0 24 24"><path d="M3 3v18h18"></path><path d="M7 15l4-4 3 3 6-7"></path></svg>
+              </div>
+              <div>
+                <strong>Resultados reais</strong>
+                <span>Relatórios e leitura de QR Code.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-visual fade-up delay-1 visible">
+          <div class="hero-screen">
+            <div class="screen-body">
+              <small>SMART<br>FIT</small>
+              <h2>Seu melhor começa <span>aqui.</span></h2>
+            </div>
+          </div>
+          <div class="screen-glow"></div>
+
+          <div class="realtime-card">
+            <div class="realtime-head">
+              <strong>Resultados em tempo real</strong>
+              <span class="live-dot">Ao vivo</span>
+            </div>
+
+            <div class="metric-grid">
+              <div class="metric">
+                <div class="metric-value" data-count="128430">0</div>
+                <div class="metric-label">Reproduções</div>
+                <div class="metric-trend">+12,5%</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value" data-count="12896">0</div>
+                <div class="metric-label">Leituras de QR</div>
+                <div class="metric-trend">+8,7%</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value" data-count="38">0</div>
+                <div class="metric-label">Pontos ativos</div>
+                <div class="metric-trend">+2</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value" data-count="97.3" data-decimals="1">0</div>
+                <div class="metric-label">Uptime médio</div>
+                <div class="metric-trend">Excelente</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="como-funciona">
+      <div class="container">
+        <div class="how-wrap fade-up">
+          <div class="how-topline">
+            <div class="how-badge">Do conteúdo ao resultado em poucos minutos</div>
+          </div>
+
+          <div class="section-head">
+            <div class="overline">Operação simples e eficiente</div>
+            <h3>Como funciona</h3>
+            <p>Uma seção mais viva, mais confiável e com percepção real de entrega.</p>
+          </div>
+
+          <div class="how-flow">
+            <div class="flow-line"></div>
+
+            <article class="flow-card fade-up delay-1">
+              <div class="step-pill">1</div>
+              <div class="step-icon">
+                <div class="upload-orbit"></div>
+              </div>
+              <div class="step-title">Você envia o conteúdo</div>
+              <div class="step-desc">Recebemos sua arte, vídeo ou campanha e iniciamos o fluxo com validação imediata.</div>
+              <div class="step-metric">
+                <strong data-count="24">0</strong>
+                <span>arquivos / dia</span>
+              </div>
+              <div class="step-foot"><span class="status-mini"></span> Upload validado em segundos</div>
+              <div class="step-progress" style="--progress: 82%"><b></b></div>
+            </article>
+
+            <article class="flow-card fade-up delay-2">
+              <div class="step-pill">2</div>
+              <div class="step-icon">
+                <div class="program-bars">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+              </div>
+              <div class="step-title">Programamos e distribuímos</div>
+              <div class="step-desc">Organizamos sua campanha por ponto, unidade e janela de exibição com controle central.</div>
+              <div class="step-metric">
+                <strong data-count="38">0</strong>
+                <span>pontos sincronizados</span>
+              </div>
+              <div class="step-foot"><span class="status-mini"></span> Grade ativa em tempo real</div>
+              <div class="step-progress" style="--progress: 91%"><b></b></div>
+            </article>
+
+            <article class="flow-card fade-up delay-3">
+              <div class="step-pill">3</div>
+              <div class="step-icon">
+                <div class="screen-wave"></div>
+              </div>
+              <div class="step-title">Exibimos nas melhores telas</div>
+              <div class="step-desc">Sua marca entra em ambientes estratégicos com prova de execução e controle por ponto.</div>
+              <div class="step-metric">
+                <strong data-count="128430">0</strong>
+                <span>exibições entregues</span>
+              </div>
+              <div class="step-foot"><span class="status-mini"></span> Última exibição há 12 segundos</div>
+              <div class="step-progress" style="--progress: 96%"><b></b></div>
+            </article>
+
+            <article class="flow-card fade-up delay-4">
+              <div class="step-pill">4</div>
+              <div class="step-icon">
+                <div class="chart-anim">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+              </div>
+              <div class="step-title">Você acompanha tudo</div>
+              <div class="step-desc">Relatórios, QR Codes, status por unidade e leitura clara do que está acontecendo agora.</div>
+              <div class="step-metric">
+                <strong data-count="97.3" data-decimals="1">0</strong>
+                <span>% de uptime médio</span>
+              </div>
+              <div class="step-foot"><span class="status-mini"></span> Painel atualizado ao vivo</div>
+              <div class="step-progress" style="--progress: 88%"><b></b></div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pontos">
+      <div class="container">
+        <div class="section-head fade-up">
+          <div class="overline">Presença estratégica</div>
+          <h3>Onde sua marca aparece</h3>
+          <p>Ambientes selecionados para gerar impacto real e posicionamento forte.</p>
+        </div>
+
+        <div class="locations-grid">
+          <article class="location-card fade-up delay-1">
+            <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=900&q=80" alt="Academia">
+            <div class="location-body">
+              <strong>Academias</strong>
+              <p>Público focado em saúde, bem-estar e rotina de alta recorrência.</p>
+            </div>
+          </article>
+
+          <article class="location-card fade-up delay-2">
+            <img src="https://images.unsplash.com/photo-1580281657527-47b4f16c0a1c?auto=format&fit=crop&w=900&q=80" alt="Clínica">
+            <div class="location-body">
+              <strong>Clínicas e consultórios</strong>
+              <p>Ambientes de espera com alta atenção e potencial de lembrança.</p>
+            </div>
+          </article>
+
+          <article class="location-card fade-up delay-3">
+            <img src="https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?auto=format&fit=crop&w=900&q=80" alt="Comércio premium">
+            <div class="location-body">
+              <strong>Comércios premium</strong>
+              <p>Lojas, centros e espaços com perfil de compra e decisão.</p>
+            </div>
+          </article>
+
+          <article class="location-card fade-up delay-4">
+            <img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=900&q=80" alt="Cafeteria">
+            <div class="location-body">
+              <strong>Cafeterias e restaurantes</strong>
+              <p>Momentos de permanência com ótima exposição da campanha.</p>
+            </div>
+          </article>
+
+          <article class="location-card fade-up delay-5">
+            <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=80" alt="Coworking">
+            <div class="location-body">
+              <strong>Escritórios e coworkings</strong>
+              <p>Ambientes corporativos com público qualificado e presença recorrente.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="vantagens">
+      <div class="container">
+        <div class="section-head fade-up">
+          <div class="overline">Diferenciais que geram resultado</div>
+          <h3>Mais que visibilidade, resultado.</h3>
+          <p>Uma estrutura criada para vender melhor, provar entrega e posicionar sua marca.</p>
+        </div>
+
+        <div class="results-wrap">
+          <div class="phone-card fade-up delay-1">
+            <div class="phone">
+              <div class="phone-inner">
+                <div class="phone-notch"></div>
+                <div class="qr-box"></div>
+                <div class="phone-label">QR Code integrado à campanha</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="diff-grid">
+            <article class="benefit-card fade-up delay-2">
+              <div class="benefit-icon">
+                <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4z"></path><path d="M14 4h6v6h-6z"></path><path d="M4 14h6v6H4z"></path><path d="M15 15h1"></path><path d="M19 15h1"></path><path d="M15 19h5"></path><path d="M17 13v4"></path></svg>
+              </div>
+              <h4>QR Code integrado</h4>
+              <p>Transforme visualização em interação com QR Codes personalizados para campanhas específicas.</p>
+            </article>
+
+            <article class="benefit-card fade-up delay-3">
+              <div class="benefit-icon">
+                <svg viewBox="0 0 24 24"><path d="M3 3v18h18"></path><path d="M7 15l4-4 3 3 4-6"></path></svg>
+              </div>
+              <h4>Relatórios em tempo real</h4>
+              <p>Acompanhe reproduções, leituras, pontos ativos e andamento da operação em um único painel.</p>
+            </article>
+
+            <article class="benefit-card fade-up delay-4">
+              <div class="benefit-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 5-3.5 8.5-7 9-3.5-.5-7-4-7-9V7l7-4z"></path><path d="M9.5 12.5l1.7 1.7 3.3-4"></path></svg>
+              </div>
+              <h4>Exibição comprovada</h4>
+              <p>Tecnologia que comprova quando, onde e em qual ponto o conteúdo realmente foi exibido.</p>
+            </article>
+
+            <article class="benefit-card fade-up delay-5">
+              <div class="benefit-icon">
+                <svg viewBox="0 0 24 24"><path d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3z"></path><path d="M8 13c2.2 0 4-1.8 4-4S10.2 5 8 5 4 6.8 4 9s1.8 4 4 4z"></path><path d="M3 20c0-3 2.6-5 6-5"></path><path d="M14 17c3 0 7 1.8 7 5"></path></svg>
+              </div>
+              <h4>Público qualificado</h4>
+              <p>Sua campanha entra em ambientes com audiência mais aderente e maior valor percebido.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="cta-band fade-up" id="contato">
+          <div>
+            <h4>Pronto para posicionar sua marca no lugar certo?</h4>
+            <p>Fale com nosso time e descubra o plano ideal para sua campanha de mídia indoor.</p>
+          </div>
+          <div class="cta-actions">
+            <a href="#" class="button-primary">Solicitar proposta</a>
+            <a href="#" class="button-secondary">Falar com especialista</a>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-chip fade-up delay-1">
+            <strong>+38</strong>
+            <span>Pontos ativos</span>
+          </div>
+          <div class="stat-chip fade-up delay-2">
+            <strong>+120 mil</strong>
+            <span>Exibições por mês</span>
+          </div>
+          <div class="stat-chip fade-up delay-3">
+            <strong>97,3%</strong>
+            <span>Uptime médio</span>
+          </div>
+          <div class="stat-chip fade-up delay-4">
+            <strong>100%</strong>
+            <span>Compromisso com entrega</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const fadeElements = document.querySelectorAll('.fade-up');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.14 });
+
+    fadeElements.forEach((el) => observer.observe(el));
+
+    const numberFormatter = (value, decimals = 0) => {
+      const options = {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      };
+      return Number(value).toLocaleString('pt-BR', options);
+    };
+
+    const animateCount = (element) => {
+      const target = Number(element.dataset.count || 0);
+      const decimals = Number(element.dataset.decimals || 0);
+      const duration = 1600;
+      const start = performance.now();
+
+      const update = (now) => {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = target * eased;
+        element.textContent = numberFormatter(current, decimals);
+        if (progress < 1) requestAnimationFrame(update);
+      };
+
+      requestAnimationFrame(update);
+    };
+
+    const countObserver = new IntersectionObserver((entries, obs) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        animateCount(entry.target);
+        obs.unobserve(entry.target);
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('[data-count]').forEach((item) => countObserver.observe(item));
+
+    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        const id = link.getAttribute('href');
+        if (!id || id === '#') return;
+        const target = document.querySelector(id);
+        if (!target) return;
+        event.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  </script>
+</body>
+</html>
